@@ -1,0 +1,9 @@
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# out
+target/
+out/
+build/
