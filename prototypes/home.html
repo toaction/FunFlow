@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            height: 64px;
+            background: #161823;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid #2b2d38;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-section span {
+            background: linear-gradient(90deg, #4A9EFF 0%, #5B8FFF 35%, #8B7FFF 65%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            filter: drop-shadow(0 2px 4px rgba(74, 158, 255, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .logo-section span:hover {
+            filter: drop-shadow(0 4px 8px rgba(74, 158, 255, 0.6));
+            transform: translateY(-1px);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .search-section {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 40px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 50px 11px 20px;
+            border-radius: 22px;
+            border: 1px solid #3a3a3a;
+            background: #2b2d38;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:hover {
+            border-color: #555;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s;
+        }
+
+        .search-icon:hover {
+            color: #fe2c55;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #3a3a3a;
+        }
+
+        /* 主内容区域 */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧导航栏 */
+        .sidebar {
+            width: 200px;
+            background: #161823;
+            border-right: 1px solid #2b2d38;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: rgba(254, 44, 85, 0.1);
+            border-left-color: #fe2c55;
+            color: #fe2c55;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 视频内容区域 */
+        .content-area {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .video-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .video-placeholder-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        /* 右侧互动区域 */
+        .interaction-sidebar {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .interaction-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .interaction-item:hover {
+            transform: scale(1.1);
+        }
+
+        .interaction-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .interaction-icon.avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #fff;
+        }
+
+        .follow-button {
+            position: absolute;
+            bottom: -5px;
+            width: 22px;
+            height: 22px;
+            background: #fe2c55;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #1a1a1a;
+        }
+
+        .interaction-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .interaction-count {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* 上下切换按钮 */
+        .navigation-controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 20px;
+            background: #161823;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-button:hover {
+            background: rgba(254, 44, 85, 0.15);
+            border-color: #fe2c55;
+            transform: scale(1.1);
+        }
+
+        .nav-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        /* 视频底部信息 */
+        .video-info {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        .video-author {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .video-description {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .video-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            color: #fe2c55;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            text-decoration: underline;
+        }
+
+        /* 进度条 */
+        .video-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fe2c55;
+            width: 30%;
+            transition: width 0.3s;
+        }
+
+        /* 底部控制栏 */
+        .bottom-controls {
+            height: 60px;
+            background: #161823;
+            border-top: 1px solid #2b2d38;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 1;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .play-pause-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-pause-button:hover {
+            background: rgba(254, 44, 85, 0.2);
+            border-color: #fe2c55;
+            transform: scale(1.05);
+        }
+
+        .play-pause-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        .time-display {
+            font-size: 13px;
+            color: #ddd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .control-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 19px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .control-btn.active {
+            background: rgba(254, 44, 85, 0.15);
+            border-color: #fe2c55;
+        }
+
+        .control-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+        }
+
+        .speed-text {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .speed-text::after {
+            content: '▲';
+            font-size: 8px;
+            opacity: 0.6;
+        }
+
+        /* 倍速菜单 */
+        .speed-menu {
+            position: absolute;
+            bottom: 50px;
+            right: 0;
+            background: #2b2d38;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 90px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .speed-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .speed-option {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #ddd;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .speed-option:last-child {
+            border-bottom: none;
+        }
+
+        .speed-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .speed-option.active {
+            background: rgba(254, 44, 85, 0.15);
+            color: #fe2c55;
+            font-weight: 600;
+        }
+
+        /* 个人中心样式 */
+        .profile-container {
+            flex: 1;
+            background: #000;
+            overflow-y: auto;
+            padding: 40px 60px;
+        }
+
+        .profile-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .profile-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .profile-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .profile-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 用户信息卡片 */
+        .user-info-card {
+            background: #161823;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid #2b2d38;
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .user-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #2b2d38;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-large svg {
+            width: 60px;
+            height: 60px;
+        }
+
+        .user-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-basic-info {
+            flex: 1;
+        }
+
+        .user-nickname {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .user-account {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .user-account span {
+            color: #aaa;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .user-bio {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .bio-title {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .bio-content {
+            font-size: 15px;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        /* 作品导航标签 */
+        .works-tabs-container {
+            background: #161823;
+            border-radius: 16px;
+            padding: 0;
+            border: 1px solid #2b2d38;
+            overflow: hidden;
+        }
+
+        .works-tabs {
+            display: flex;
+            border-bottom: 1px solid #2b2d38;
+        }
+
+        .works-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 500;
+            color: #888;
+            position: relative;
+            border-bottom: 3px solid transparent;
+        }
+
+        .works-tab:hover {
+            color: #ddd;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .works-tab.active {
+            color: #fe2c55;
+            background: rgba(254, 44, 85, 0.05);
+            border-bottom-color: #fe2c55;
+        }
+
+        .works-tab-count {
+            font-size: 13px;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .works-tab.active .works-tab-count {
+            color: #fe2c55;
+        }
+
+        /* 作品内容区域 */
+        .works-content {
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .work-item {
+            aspect-ratio: 9/16;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s;
+            border: 1px solid #2b2d38;
+        }
+
+        .work-item:hover {
+            transform: translateY(-5px);
+            border-color: #fe2c55;
+        }
+
+        .work-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .work-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .work-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 2;
+            color: white;
+        }
+
+        .work-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .work-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* 收藏文件夹列表样式 */
+        .folders-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .folder-item {
+            background: #1a1a1a;
+            border: 1px solid #2b2d38;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .folder-item:hover {
+            background: #222;
+            border-color: #fe2c55;
+            transform: translateY(-3px);
+        }
+
+        .folder-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(254, 44, 85, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .folder-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .folder-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .folder-count {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .folder-item:hover .folder-name {
+            color: #fe2c55;
+        }
+
+        /* 隐藏/显示内容 */
+        .works-content-section {
+            display: none;
+        }
+
+        .works-content-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <div id="topbar-container" class="top-navbar"></div>
+
+        <!-- 主内容区域 -->
+        <div class="main-wrapper">
+            <!-- 左侧导航栏 -->
+            <div id="sidebar-container" class="sidebar"></div>
+
+            <!-- 个人中心内容区域 -->
+            <div class="profile-container">
+                <!-- 用户信息卡片 -->
+                <div class="user-info-card">
+                    <div class="user-header">
+                        <div class="user-avatar-large">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <div class="user-basic-info">
+                            <div class="user-nickname">FunFlow</div>
+                            <div class="user-account">帐号：<span>funflow2025</span></div>
+                            <div class="user-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number">128</div>
+                                    <div class="stat-label">关注</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">2.5K</div>
+                                    <div class="stat-label">粉丝</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">15.8K</div>
+                                    <div class="stat-label">获赞</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-bio">
+                        <div class="bio-title">个人简介</div>
+                        <div class="bio-content">热爱生活，分享快乐 ✨<br>记录生活中的美好瞬间 📸<br>欢迎关注交流 💫</div>
+                    </div>
+                </div>
+
+                <!-- 作品导航标签 -->
+                <div class="works-tabs-container">
+                    <div class="works-tabs">
+                        <div class="works-tab active" data-tab="works">
+                            作品 <span class="works-tab-count">(24)</span>
+                        </div>
+                        <div class="works-tab" data-tab="likes">
+                            喜欢 <span class="works-tab-count">(156)</span>
+                        </div>
+                        <div class="works-tab" data-tab="favorites">
+                            收藏 <span class="works-tab-count">(89)</span>
+                        </div>
+                        <div class="works-tab" data-tab="history">
+                            观看历史 <span class="works-tab-count">(342)</span>
+                        </div>
+                    </div>
+                    <div class="works-content">
+                        <!-- 作品内容区域 -->
+                        <div class="works-content-section active" data-content="works">
+                            <div class="works-grid">
+                                <div class="work-item">
+                                    <div class="work-placeholder">📹</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>1.2K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>56</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">🎬</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>890</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>42</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">🎥</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>2.3K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>78</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">📽️</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>1.5K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>63</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">🎞️</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>980</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>34</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">📹</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>1.8K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>92</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 喜欢内容区域 -->
+                        <div class="works-content-section" data-content="likes">
+                            <div class="works-grid">
+                                <div class="work-item">
+                                    <div class="work-placeholder">❤️</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>3.2K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>125</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">💖</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>2.8K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>98</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 收藏文件夹列表 -->
+                        <div class="works-content-section" data-content="favorites">
+                            <div class="folders-list">
+                                <div class="folder-item">
+                                    <div class="folder-icon">📁</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">默认收藏夹</div>
+                                        <div class="folder-count">45个视频</div>
+                                    </div>
+                                </div>
+                                <div class="folder-item">
+                                    <div class="folder-icon">🎬</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">搞笑视频</div>
+                                        <div class="folder-count">28个视频</div>
+                                    </div>
+                                </div>
+                                <div class="folder-item">
+                                    <div class="folder-icon">🎵</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">音乐舞蹈</div>
+                                        <div class="folder-count">16个视频</div>
+                                    </div>
+                                </div>
+                                <div class="folder-item">
+                                    <div class="folder-icon">🍲</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">美食教程</div>
+                                        <div class="folder-count">32个视频</div>
+                                    </div>
+                                </div>
+                                <div class="folder-item">
+                                    <div class="folder-icon">✈️</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">旅行vlog</div>
+                                        <div class="folder-count">21个视频</div>
+                                    </div>
+                                </div>
+                                <div class="folder-item">
+                                    <div class="folder-icon">💡</div>
+                                    <div class="folder-info">
+                                        <div class="folder-name">生活技巧</div>
+                                        <div class="folder-count">19个视频</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 观看历史区域 -->
+                        <div class="works-content-section" data-content="history">
+                            <div class="works-grid">
+                                <div class="work-item">
+                                    <div class="work-placeholder">🕐</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>5.6K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>234</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="work-item">
+                                    <div class="work-placeholder">⏰</div>
+                                    <div class="work-info">
+                                        <div class="work-stats">
+                                            <div class="work-stat">
+                                                <span>❤️</span>
+                                                <span>4.2K</span>
+                                            </div>
+                                            <div class="work-stat">
+                                                <span>💬</span>
+                                                <span>156</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 作品导航标签切换
+        document.querySelectorAll('.works-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有active状态
+                document.querySelectorAll('.works-tab').forEach(t => t.classList.remove('active'));
+                // 添加当前active状态
+                this.classList.add('active');
+                
+                const tabType = this.getAttribute('data-tab');
+                console.log('切换到标签:', tabType);
+                
+                // 切换对应的内容区域
+                document.querySelectorAll('.works-content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                const targetSection = document.querySelector(`.works-content-section[data-content="${tabType}"]`);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+            });
+        });
+
+        // 统计项点击效果
+        document.querySelectorAll('.stat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const label = this.querySelector('.stat-label').textContent;
+                console.log('点击统计项:', label);
+                // 这里可以添加跳转到对应列表的逻辑
+            });
+        });
+
+        // 作品项点击效果
+        document.querySelectorAll('.work-item').forEach(item => {
+            item.addEventListener('click', function() {
+                console.log('点击作品项');
+                // 这里可以添加播放视频或跳转到详情页的逻辑
+            });
+        });
+
+        // 收藏文件夹点击效果
+        document.querySelectorAll('.folder-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const folderName = this.querySelector('.folder-name').textContent;
+                console.log('点击收藏夹:', folderName);
+                // 这里可以添加打开文件夹查看内容的逻辑
+            });
+        });
+    </script>
+    
+    <!-- 加载公共组件 -->
+    <script src="js/common.js"></script>
+</body>
+</html>

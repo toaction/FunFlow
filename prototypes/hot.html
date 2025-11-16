@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            height: 64px;
+            background: #161823;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid #2b2d38;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-section span {
+            background: linear-gradient(90deg, #4A9EFF 0%, #5B8FFF 35%, #8B7FFF 65%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            filter: drop-shadow(0 2px 4px rgba(74, 158, 255, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .logo-section span:hover {
+            filter: drop-shadow(0 4px 8px rgba(74, 158, 255, 0.6));
+            transform: translateY(-1px);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .search-section {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 40px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 50px 11px 20px;
+            border-radius: 22px;
+            border: 1px solid #3a3a3a;
+            background: #2b2d38;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:hover {
+            border-color: #555;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s;
+        }
+
+        .search-icon:hover {
+            color: #fe2c55;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #3a3a3a;
+        }
+
+        /* 主内容区域 */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧导航栏 */
+        .sidebar {
+            width: 200px;
+            background: #161823;
+            border-right: 1px solid #2b2d38;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: rgba(254, 44, 85, 0.1);
+            border-left-color: #fe2c55;
+            color: #fe2c55;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 视频内容区域 */
+        .content-area {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .video-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .video-placeholder-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        /* 右侧互动区域 */
+        .interaction-sidebar {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .interaction-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .interaction-item:hover {
+            transform: scale(1.1);
+        }
+
+        .interaction-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .interaction-icon.avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #fff;
+        }
+
+        .follow-button {
+            position: absolute;
+            bottom: -5px;
+            width: 22px;
+            height: 22px;
+            background: #fe2c55;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #1a1a1a;
+        }
+
+        .interaction-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .interaction-count {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* 上下切换按钮 */
+        .navigation-controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 20px;
+            background: #161823;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-button:hover {
+            background: rgba(254, 44, 85, 0.15);
+            border-color: #fe2c55;
+            transform: scale(1.1);
+        }
+
+        .nav-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        /* 视频底部信息 */
+        .video-info {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        .video-author {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .video-description {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .video-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            color: #fe2c55;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            text-decoration: underline;
+        }
+
+        /* 进度条 */
+        .video-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fe2c55;
+            width: 30%;
+            transition: width 0.3s;
+        }
+
+        /* 底部控制栏 */
+        .bottom-controls {
+            height: 60px;
+            background: #161823;
+            border-top: 1px solid #2b2d38;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 1;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .play-pause-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-pause-button:hover {
+            background: rgba(254, 44, 85, 0.2);
+            border-color: #fe2c55;
+            transform: scale(1.05);
+        }
+
+        .play-pause-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        .time-display {
+            font-size: 13px;
+            color: #ddd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .control-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 19px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .control-btn.active {
+            background: rgba(254, 44, 85, 0.15);
+            border-color: #fe2c55;
+        }
+
+        .control-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+        }
+
+        .speed-text {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .speed-text::after {
+            content: '▲';
+            font-size: 8px;
+            opacity: 0.6;
+        }
+
+        /* 倍速菜单 */
+        .speed-menu {
+            position: absolute;
+            bottom: 50px;
+            right: 0;
+            background: #2b2d38;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 90px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .speed-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .speed-option {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #ddd;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .speed-option:last-child {
+            border-bottom: none;
+        }
+
+        .speed-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .speed-option.active {
+            background: rgba(254, 44, 85, 0.15);
+            color: #fe2c55;
+            font-weight: 600;
+        }
+
+        /* 热门榜单导航栏 */
+        .hot-tabs-container {
+            height: 56px;
+            background: #161823;
+            border-bottom: 1px solid #2b2d38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .hot-tab {
+            padding: 8px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            font-weight: 500;
+            color: #999;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .hot-tab:hover {
+            color: #ddd;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hot-tab.active {
+            color: #fff;
+            background: rgba(254, 44, 85, 0.15);
+            border-color: rgba(254, 44, 85, 0.3);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <div id="topbar-container" class="top-navbar"></div>
+
+        <!-- 主内容区域 -->
+        <div class="main-wrapper">
+            <!-- 左侧导航栏 -->
+            <div id="sidebar-container" class="sidebar"></div>
+
+            <!-- 视频内容区域 -->
+            <div class="content-area">
+                <!-- 热门榜单导航栏 -->
+                <div class="hot-tabs-container">
+                    <div class="hot-tab active" data-period="hour">小时榜</div>
+                    <div class="hot-tab" data-period="day">每天榜</div>
+                    <div class="hot-tab" data-period="week">每周榜</div>
+                    <div class="hot-tab" data-period="month">每月榜</div>
+                </div>
+
+                <div class="video-container">
+                    <div class="video-placeholder">
+                        <div class="video-placeholder-icon">📹</div>
+                        <div>视频暂无授权播放</div>
+                    </div>
+
+                    <!-- 视频底部信息 -->
+                    <div class="video-info">
+                        <div class="video-author">@用户昵称</div>
+<div class="video-description">
+                            这是一个视频描述
+                        </div>
+                        <div class="video-tags">
+                            <span class="tag">#标签1</span>
+                            <span class="tag">#标签2</span>
+                            <span class="tag">#标签3</span>
+                        </div>
+                    </div>
+
+                    <!-- 进度条 -->
+                    <div class="video-progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- 右侧互动区域 -->
+                <div class="interaction-sidebar">
+                    <!-- 用户头像 -->
+                    <div class="interaction-item">
+                        <div class="interaction-icon avatar">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            <div class="follow-button">+</div>
+                        </div>
+                    </div>
+
+                    <!-- 点赞 -->
+                    <div class="interaction-item">
+                        <div class="interaction-icon">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                        <span class="interaction-count">1053</span>
+                    </div>
+
+                    <!-- 收藏 -->
+                    <div class="interaction-item">
+                        <div class="interaction-icon">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                        </div>
+                        <span class="interaction-count">151</span>
+                    </div>
+
+                    <!-- 评论 -->
+                    <div class="interaction-item">
+                        <div class="interaction-icon">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+                            </svg>
+                        </div>
+                        <span class="interaction-count">61</span>
+                    </div>
+                </div>
+
+                <!-- 底部控制栏 -->
+                <div class="bottom-controls">
+                    <div class="video-controls">
+                        <!-- 左侧：播放按钮和时间 -->
+                        <div class="controls-left">
+                            <div class="play-pause-button" id="playPauseBtn">
+                                <svg viewBox="0 0 24 24" id="playIcon">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <svg viewBox="0 0 24 24" id="pauseIcon" style="display:none;">
+                                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                </svg>
+                            </div>
+                            <div class="time-display">
+                                <span id="currentTime">00:01</span> / <span id="totalTime">00:29</span>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：倍速和音量按钮 -->
+                        <div class="controls-right">
+                            <!-- 倍速按钮 -->
+                            <div class="control-btn" id="speedBtn" title="播放速度" style="position: relative;">
+                                <span class="speed-text" id="speedText">1x</span>
+                                <!-- 倍速菜单 -->
+                                <div class="speed-menu" id="speedMenu">
+                                    <div class="speed-option active" data-speed="1">1x</div>
+                                    <div class="speed-option" data-speed="1.25">1.25x</div>
+                                    <div class="speed-option" data-speed="1.5">1.5x</div>
+                                    <div class="speed-option" data-speed="2">2.0x</div>
+                                </div>
+                            </div>
+                            <!-- 音量按钮 -->
+                            <div class="control-btn" id="volumeBtn" title="音量">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上下切换按钮 -->
+            <div class="navigation-controls">
+                <div class="nav-button" onclick="console.log('上一个视频')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+                    </svg>
+                </div>
+                <div class="nav-button" onclick="console.log('下一个视频')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 播放/暂停按钮
+        let isPlaying = false;
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+
+        playPauseBtn.addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+            }
+        });
+
+        // 倍速按钮和菜单
+        const speedBtn = document.getElementById('speedBtn');
+        const speedText = document.getElementById('speedText');
+        const speedMenu = document.getElementById('speedMenu');
+        let currentSpeed = 1;
+
+        // 切换菜单显示/隐藏
+        speedBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            speedMenu.classList.toggle('show');
+            speedBtn.classList.toggle('active');
+        });
+
+        // 选择倍速选项
+        document.querySelectorAll('.speed-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const speed = parseFloat(this.getAttribute('data-speed'));
+                currentSpeed = speed;
+                
+                // 更新显示文本
+                speedText.textContent = this.textContent;
+                
+                // 更新active状态
+                document.querySelectorAll('.speed-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 隐藏菜单
+                speedMenu.classList.remove('show');
+                speedBtn.classList.remove('active');
+                
+                console.log('播放速度设置为:', speed + 'x');
+            });
+        });
+
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function() {
+            speedMenu.classList.remove('show');
+            speedBtn.classList.remove('active');
+        });
+
+        // 音量按钮
+        let isMuted = false;
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeSvg = volumeBtn.querySelector('svg');
+
+        volumeBtn.addEventListener('click', function() {
+            isMuted = !isMuted;
+            if (isMuted) {
+                volumeSvg.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+            } else {
+                volumeSvg.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            }
+        });
+
+        // 交互效果
+        document.querySelectorAll('.interaction-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const icon = this.querySelector('.interaction-icon');
+                
+                // 点击动画
+                icon.style.transition = 'transform 0.2s';
+                icon.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    icon.style.transform = 'scale(1)';
+                }, 200);
+
+                // 如果是点赞按钮，改变颜色
+                if (this.querySelector('svg path[d*="21.35"]')) {
+                    const svg = this.querySelector('svg');
+                    if (svg.style.fill === 'rgb(254, 44, 85)') {
+                        svg.style.fill = 'white';
+                    } else {
+                        svg.style.fill = '#fe2c55';
+                    }
+                }
+            });
+        });
+
+        // 导航按钮效果（页面跳转由href处理，不需要preventDefault）
+
+        // 热门榜单切换
+        document.querySelectorAll('.hot-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有active状态
+                document.querySelectorAll('.hot-tab').forEach(t => t.classList.remove('active'));
+                // 添加当前active状态
+                this.classList.add('active');
+                
+                const period = this.getAttribute('data-period');
+                console.log('切换到:', period);
+                // 这里可以添加加载对应榜单数据的逻辑
+            });
+        });
+
+        // 模拟进度条和时间动画
+        let progress = 0;
+        let currentSeconds = 1;
+        const totalSeconds = 29;
+        const currentTimeSpan = document.getElementById('currentTime');
+        const progressFill = document.querySelector('.progress-fill');
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        setInterval(() => {
+            if (isPlaying) {
+                currentSeconds = (currentSeconds % totalSeconds) + 1;
+                progress = (currentSeconds / totalSeconds) * 100;
+                currentTimeSpan.textContent = formatTime(currentSeconds);
+                progressFill.style.width = progress + '%';
+            }
+        }, 1000);
+    </script>
+    
+    <!-- 加载公共组件 -->
+    <script src="js/common.js"></script>
+</body>
+</html>
