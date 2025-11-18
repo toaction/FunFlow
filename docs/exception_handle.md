@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     
     // 处理 @RequestBody + @Valid 参数校验异常
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse handleValidationException(MethodArgumentNotValidException e,
+    public Result handleValidationException(MethodArgumentNotValidException e,
                                                        HttpServletRequest request) {
         String message = e.getBindingResult()
                 .getFieldErrors()
@@ -50,12 +50,12 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         
         log.warn("参数校验失败: {}", message);
-        return ApiResponse.error("VALIDATION_ERROR", message);
+        return Result.error("VALIDATION_ERROR", message);
     }
 
     // 处理普通参数校验异常
     @ExceptionHandler(ConstraintViolationException.class)
-    public ApiResponse handleConstraintViolationException(
+    public Result handleConstraintViolationException(
             ConstraintViolationException e, HttpServletRequest request) {
         String message = e.getConstraintViolations().stream()
                 .findFirst()
