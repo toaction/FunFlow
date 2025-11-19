@@ -6,7 +6,7 @@ import com.action.common.Code;
  * 业务异常类
  * 用于业务逻辑中的异常情况
  *
- * @author Micro Liu
+ * @author Xiangfu
  * @date 2025-11-18
  */
 public class BusinessException extends BaseException {

@@ -7,7 +7,7 @@ import lombok.Getter;
  * 所有自定义异常的基类
  * https://github.com/toaction/FunFlow/issues/4
  *
- * @author Micro Liu
+ * @author Xiangfu
  * @date 2025-11-18
  */
 @Getter

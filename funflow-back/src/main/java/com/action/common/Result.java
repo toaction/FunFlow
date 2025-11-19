@@ -6,7 +6,7 @@ import lombok.Data;
  * 统一返回结果封装类
  *
  * @param <T> 返回数据类型
- * @author Micro Liu
+ * @author Xiangfu
  * @date 2025-11-18
  */
 @Data

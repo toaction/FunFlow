@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * 全局异常处理器
  * 统一处理系统中的各类异常
  *
- * @author Micro Liu
+ * @author Xiangfu
  * @date 2025-11-18
  */
 @RestControllerAdvice
