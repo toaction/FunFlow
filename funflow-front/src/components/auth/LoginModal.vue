@@ -1,0 +1,301 @@
+<script setup lang="ts">
+import { ref, reactive, watch } from 'vue'
+import { getCaptcha, login, type LoginData } from '@/api/auth'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessage, ElDialog, ElForm, ElFormItem, ElInput, ElButton } from 'element-plus'
+
+const props = defineProps<{
+  show: boolean
+}>()
+
+const emit = defineEmits(['close', 'switch-to-register'])
+
+const authStore = useAuthStore()
+const loading = ref(false)
+const formRef = ref()
+const formData = reactive<LoginData>({
+  email: '',
+  password: '',
+  captchaId: '',
+  captchaText: ''
+})
+
+const captchaImage = ref('')
+
+const fetchCaptcha = async () => {
+  try {
+    const res = await getCaptcha()
+    if (res.code === 200) {
+      formData.captchaId = res.data.captchaId
+      captchaImage.value = res.data.imageData
+    }
+  } catch (error) {
+    console.error('Failed to fetch captcha:', error)
+  }
+}
+
+const handleClose = () => {
+  emit('close')
+}
+
+const handleLogin = async () => {
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      if (loading.value) return
+      loading.value = true
+      try {
+        const res = await login(formData)
+        if (res.code === 200) {
+          authStore.setToken(res.data.accessToken)
+          ElMessage.success('登录成功')
+          handleClose()
+        }
+      } catch (error) {
+        ElMessage.error('登录失败，请检查用户名或密码')
+        fetchCaptcha()
+      } finally {
+        loading.value = false
+      }
+    }
+  })
+}
+
+watch(() => props.show, (newVal) => {
+  if (newVal) {
+    fetchCaptcha()
+    formData.password = ''
+    formData.captchaText = ''
+  }
+})
+
+const rules = {
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' }
+  ],
+  captchaText: [
+    { required: true, message: '请输入验证码', trigger: 'blur' }
+  ]
+}
+</script>
+
+<template>
+  <el-dialog
+    :model-value="show"
+    @close="handleClose"
+    width="440px"
+    class="glass-dialog"
+    align-center
+    :show-close="true"
+    :append-to-body="true"
+    destroy-on-close
+  >
+    <template #header>
+      <div class="modal-header">
+        <h2 class="modal-title">欢迎回来</h2>
+        <p class="modal-subtitle">登录 FunFlow 探索更多精彩</p>
+      </div>
+    </template>
+
+    <div class="modal-body">
+      <el-form 
+        ref="formRef"
+        :model="formData"
+        :rules="rules"
+        label-position="top"
+        @submit.prevent="handleLogin"
+        size="large"
+      >
+        <el-form-item label="邮箱" prop="email">
+          <el-input 
+            v-model="formData.email" 
+            placeholder="请输入邮箱地址" 
+            clearable
+          />
+        </el-form-item>
+
+        <el-form-item label="密码" prop="password">
+          <el-input 
+            v-model="formData.password" 
+            type="password" 
+            placeholder="请输入密码" 
+            show-password
+          />
+        </el-form-item>
+
+        <el-form-item label="图形验证码" prop="captchaText">
+          <div class="captcha-row">
+            <el-input 
+              v-model="formData.captchaText" 
+              placeholder="验证码" 
+              class="captcha-input"
+            />
+            <div class="captcha-image-container" @click="fetchCaptcha" title="点击刷新验证码">
+               <img :src="captchaImage" v-if="captchaImage" class="captcha-img" alt="captcha"/>
+               <span v-else class="loading-text">加载中...</span>
+            </div>
+          </div>
+        </el-form-item>
+
+        <el-button 
+          type="primary" 
+          class="primary-btn" 
+          :loading="loading" 
+          @click="handleLogin"
+        >
+          登录
+        </el-button>
+
+        <div class="switch-mode">
+          还没有账号？<a class="switch-link" @click="$emit('switch-to-register')">立即注册</a>
+        </div>
+      </el-form>
+    </div>
+  </el-dialog>
+</template>
+
+<style scoped>
+.modal-header {
+  text-align: center;
+  padding-top: 20px;
+}
+
+.modal-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.modal-subtitle {
+  font-size: 15px;
+  color: #8a8b8e;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 0 20px 20px;
+}
+
+.captcha-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.captcha-input {
+  flex: 1;
+}
+
+.captcha-image-container {
+  width: 120px;
+  height: 40px;
+  background: #2b2d38;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.captcha-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading-text {
+  font-size: 12px;
+  color: #8a8b8e;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  background: linear-gradient(92deg, #fe2c55 0%, #e02050 100%);
+  border: none;
+  transition: all 0.3s;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(92deg, #ff476e 0%, #f02a5b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(254, 44, 85, 0.3);
+}
+
+.switch-mode {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #8a8b8e;
+}
+
+.switch-link {
+  color: #fe2c55;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+
+.switch-link:hover {
+  text-decoration: underline;
+  color: #ff476e;
+}
+
+/* Customizing Element Plus Input for Dark Theme */
+:deep(.el-input__wrapper) {
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  border-radius: 12px;
+  padding: 8px 16px;
+  transition: all 0.3s;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px #fe2c55 inset !important;
+}
+
+:deep(.el-input__inner) {
+  color: #fff;
+  height: 32px;
+}
+
+:deep(.el-form-item__label) {
+  color: #e4e6eb;
+}
+</style>
+
+<style>
+/* Global override for this specific dialog class */
+.glass-dialog.el-dialog {
+  background: rgba(31, 33, 45, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.glass-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: #8a8b8e;
+  font-size: 20px;
+}
+
+.glass-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+  color: #fff;
+}
+</style>
