@@ -1,3 +1,7 @@
+<!-- 此组件已被 common.js 中的 getTopbarHTML() 函数替代 -->
+<!-- 支持动态登录状态显示：未登录显示登录按钮，已登录显示用户头像 -->
+<!-- 请使用 common.js 来加载顶部导航栏 -->
+
 <div class="logo-section">
     <div class="logo-icon">
         <img src="../Pictures/logo/logo.jpeg" alt="FunFlow Logo">
@@ -15,10 +19,15 @@
 </div>
 
 <div class="user-section">
-    <div class="user-avatar">
+    <!-- 根据登录状态动态显示 -->
+    <!-- 未登录：显示登录按钮 -->
+    <button class="login-btn" onclick="showAuthModal('login')" title="登录">登录</button>
+    
+    <!-- 已登录：显示用户头像（默认隐藏，由 common.js 控制） -->
+    <!-- <div class="user-avatar" onclick="showUserMenu()" title="个人中心">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
         </svg>
-    </div>
+    </div> -->
 </div>
 
