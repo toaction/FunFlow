@@ -17,7 +17,7 @@
 ## 表设计
 ```sql
 CREATE TABLE user (
-    id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
+    user_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
     
     -- 展示信息
     avatar VARCHAR(255) NOT NULL DEFAULT 'default-avatar.jpg' COMMENT '头像URL',
