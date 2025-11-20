@@ -2,15 +2,20 @@ package com.action.service.impl;
 
 import com.action.common.RedisConstants;
 import com.action.dao.UserMapper;
+import com.action.domain.dto.RegisterRequest;
 import com.action.domain.dto.SendEmailCodeRequest;
+import com.action.domain.entity.User;
 import com.action.exception.BusinessException;
 import com.action.service.AuthService;
 import com.action.service.EmailService;
+
+import cn.hutool.crypto.digest.BCrypt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -23,13 +28,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
-    
+
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    
+
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private EmailService emailService;
     
@@ -89,6 +94,89 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("该邮箱已被注册");
         }
     }
+
+    @Override
+    public void register(RegisterRequest request) {
+        String email = request.getEmail().toLowerCase();
+        String emailCode = request.getEmailCode();
+        String password = request.getPassword();
+
+        // 1. 验证邮箱验证码
+        validateEmailCode(email, emailCode);
+
+        // 2. 再次校验邮箱是否已被注册（防止数据竞争）
+        // 在校验验证码和最终注册之间可能很短的时间内有人注册了
+        validateEmailNotRegistered(email);
+
+        // 3. 创建用户
+        createUser(email, password);
+    }
+
+    /**
+     * 验证邮箱验证码
+     *
+     * @param email     邮箱地址
+     * @param emailCode 用户输入的验证码
+     */
+    private void validateEmailCode(String email, String emailCode) {
+        String redisKey = RedisConstants.getEmailCodeKey(email);
+        String correctCode = stringRedisTemplate.opsForValue().get(redisKey);
+
+        // 验证码不存在或已过期
+        if (correctCode == null) {
+            throw new BusinessException("验证码已过期，请重新获取");
+        }
+
+        // 比较验证码
+        if (!correctCode.equals(emailCode)) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 验证码验证成功后，立即删除（一次性使用）
+        stringRedisTemplate.delete(redisKey);
+    }
+
+    /**
+     * 创建用户并保存到数据库
+     *
+     * @param email    邮箱地址
+     * @param password 明文密码
+     */
+    private void createUser(String email, String password) {
+        User user = new User();
+        user.setEmail(email);
+        user.setUsername(email); // 用户名默认使用邮箱
+        user.setNickname(extractNicknameFromEmail(email)); // 昵称从邮箱中提取
+        user.setAvatar("default-avatar.jpg"); // 默认头像
+        user.setBio(""); // 默认简介为空
+        user.setPasswordHash(BCrypt.hashpw(password)); // 密码加密
+        user.setStatus(1); // 正常状态
+        user.setFollowingCount(0);
+        user.setFollowerCount(0);
+        user.setCachedTotalLikes(0L);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userMapper.insert(user);
+
+        log.info("用户注册成功，邮箱: {}", email);
+    }
+
+    /**
+     * 从邮箱中提取昵称
+     * 例如：user@example.com -> user
+     *
+     * @param email 邮箱地址
+     * @return 昵称
+     */
+    private String extractNicknameFromEmail(String email) {
+        int atIndex = email.indexOf('@');
+        if (atIndex > 0) {
+            return email.substring(0, atIndex);
+        }
+        return email;
+    }
+
     
     /**
      * 生成6位数字验证码
