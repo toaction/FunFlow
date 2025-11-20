@@ -18,8 +18,12 @@ export interface CaptchaResponse {
   imageData: string
 }
 
+/**
+ * 获取图形验证码
+ * @returns 验证码响应数据
+ */
 export function getCaptcha() {
-  return request.get<any, { code: number; data: CaptchaResponse }>('/auth/captcha')
+  return request.get<any, { code: number; msg: string; data: CaptchaResponse }>('/auth/captcha')
 }
 
 export function sendEmailCode(data: { email: string; captchaId: string; captchaText: string }) {

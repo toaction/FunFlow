@@ -13,6 +13,7 @@ const loading = ref(false)
 const sendingCode = ref(false)
 const countdown = ref(0)
 const captchaImage = ref('')
+const captchaLoading = ref(false)
 const formRef = ref()
 
 const formData = reactive({
@@ -25,13 +26,23 @@ const formData = reactive({
 
 const fetchCaptcha = async () => {
   try {
+    captchaLoading.value = true
+    captchaImage.value = '' // 清空旧图片
+    formData.captchaId = ''
+    formData.captchaText = '' // 清空用户输入的验证码
+    
     const res = await getCaptcha()
     if (res.code === 200) {
       formData.captchaId = res.data.captchaId
       captchaImage.value = res.data.imageData
+    } else {
+      ElMessage.error(res.msg || '获取验证码失败，请重试')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch captcha:', error)
+    ElMessage.error(error.response?.data?.msg || '获取验证码失败，请稍后重试')
+  } finally {
+    captchaLoading.value = false
   }
 }
 
@@ -192,9 +203,9 @@ const rules = {
               placeholder="验证码" 
               class="captcha-input"
             />
-            <div class="captcha-image-container" @click="fetchCaptcha" title="点击刷新">
-               <img :src="captchaImage" v-if="captchaImage" class="captcha-img" alt="captcha"/>
-               <span v-else class="loading-text">加载中...</span>
+            <div class="captcha-image-container" @click="fetchCaptcha" title="点击刷新验证码">
+               <img :src="captchaImage" v-if="captchaImage && !captchaLoading" class="captcha-img" alt="captcha"/>
+               <span v-else class="loading-text">{{ captchaLoading ? '加载中...' : '点击刷新' }}</span>
             </div>
           </div>
         </el-form-item>

@@ -21,16 +21,27 @@ const formData = reactive<LoginData>({
 })
 
 const captchaImage = ref('')
+const captchaLoading = ref(false)
 
 const fetchCaptcha = async () => {
   try {
+    captchaLoading.value = true
+    captchaImage.value = '' // 清空旧图片
+    formData.captchaId = ''
+    formData.captchaText = '' // 清空用户输入的验证码
+    
     const res = await getCaptcha()
     if (res.code === 200) {
       formData.captchaId = res.data.captchaId
       captchaImage.value = res.data.imageData
+    } else {
+      ElMessage.error(res.msg || '获取验证码失败，请重试')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch captcha:', error)
+    ElMessage.error(error.response?.data?.msg || '获取验证码失败，请稍后重试')
+  } finally {
+    captchaLoading.value = false
   }
 }
 
@@ -73,7 +84,7 @@ watch(() => props.show, (newVal) => {
 const rules = {
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email' as const, message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
@@ -136,8 +147,8 @@ const rules = {
               class="captcha-input"
             />
             <div class="captcha-image-container" @click="fetchCaptcha" title="点击刷新验证码">
-               <img :src="captchaImage" v-if="captchaImage" class="captcha-img" alt="captcha"/>
-               <span v-else class="loading-text">加载中...</span>
+               <img :src="captchaImage" v-if="captchaImage && !captchaLoading" class="captcha-img" alt="captcha"/>
+               <span v-else class="loading-text">{{ captchaLoading ? '加载中...' : '点击刷新' }}</span>
             </div>
           </div>
         </el-form-item>
