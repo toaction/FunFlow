@@ -35,11 +35,11 @@ const fetchCaptcha = async () => {
       formData.captchaId = res.data.captchaId
       captchaImage.value = res.data.imageData
     } else {
-      ElMessage.error(res.msg || '获取验证码失败，请重试')
+      ElMessage.error(res.message || '获取验证码失败，请重试')
     }
   } catch (error: any) {
     console.error('Failed to fetch captcha:', error)
-    ElMessage.error(error.response?.data?.msg || '获取验证码失败，请稍后重试')
+    ElMessage.error(error.response?.data?.message || '获取验证码失败，请稍后重试')
   } finally {
     captchaLoading.value = false
   }
@@ -62,6 +62,8 @@ const handleLogin = async () => {
           authStore.setToken(res.data.accessToken)
           ElMessage.success('登录成功')
           handleClose()
+        } else {
+          ElMessage.error(res.message || '登录失败，请检查用户名或密码')
         }
       } catch (error) {
         ElMessage.error('登录失败，请检查用户名或密码')

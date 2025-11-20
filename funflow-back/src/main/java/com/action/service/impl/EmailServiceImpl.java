@@ -1,0 +1,66 @@
+package com.action.service.impl;
+
+import com.action.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+import com.action.exception.BusinessException;
+
+/**
+ * 邮件服务实现类
+ *
+ * @author Xiangfu
+ * @date 2025-11-20
+ */
+@Service
+@Slf4j
+public class EmailServiceImpl implements EmailService {
+    
+    @Autowired
+    private JavaMailSender mailSender;
+    
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+    
+    @Value("${app.email.code.subject:FunFlow 验证码}")
+    private String subject;
+    
+    @Override
+    public void sendEmailCode(String to, String code) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(buildEmailContent(code));
+            
+            mailSender.send(message);
+            log.info("邮箱验证码发送成功，收件人: {}", to);
+        } catch (Exception e) {
+            log.error("邮箱验证码发送失败，收件人: {}", to, e);
+            throw new BusinessException("邮件发送失败，请稍后重试");
+        }
+    }
+    
+    /**
+     * 构建邮件内容
+     *
+     * @param code 验证码
+     * @return 邮件内容
+     */
+    private String buildEmailContent(String code) {
+        return String.format(
+                "您好！\n\n" +
+                "您的 FunFlow 验证码是：%s\n\n" +
+                "验证码有效期为 5 分钟，请勿泄露给他人。\n\n" +
+                "如非本人操作，请忽略此邮件。\n\n" +
+                "FunFlow 团队",
+                code
+        );
+    }
+}
+

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, onBeforeUnmount } from 'vue'
 import { getCaptcha, sendEmailCode, register } from '@/api/auth'
 import { ElMessage, ElDialog, ElForm, ElFormItem, ElInput, ElButton } from 'element-plus'
 
@@ -12,6 +12,7 @@ const emit = defineEmits(['close', 'switch-to-login'])
 const loading = ref(false)
 const sendingCode = ref(false)
 const countdown = ref(0)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
 const captchaImage = ref('')
 const captchaLoading = ref(false)
 const formRef = ref()
@@ -36,11 +37,11 @@ const fetchCaptcha = async () => {
       formData.captchaId = res.data.captchaId
       captchaImage.value = res.data.imageData
     } else {
-      ElMessage.error(res.msg || '获取验证码失败，请重试')
+      ElMessage.error(res.message || '获取验证码失败，请重试')
     }
   } catch (error: any) {
     console.error('Failed to fetch captcha:', error)
-    ElMessage.error(error.response?.data?.msg || '获取验证码失败，请稍后重试')
+    ElMessage.error(error.response?.data?.message || '获取验证码失败，请稍后重试')
   } finally {
     captchaLoading.value = false
   }
@@ -58,15 +59,21 @@ const handleSendCode = async () => {
   
   sendingCode.value = true
   try {
-    await sendEmailCode({
+    const res = await sendEmailCode({
       email: formData.email,
       captchaId: formData.captchaId,
       captchaText: formData.captchaText
     })
-    ElMessage.success('验证码已发送到您的邮箱')
-    startCountdown()
+    if (res.code === 200) {
+      ElMessage.success(res.message || '验证码已发送到您的邮箱')
+      startCountdown()
+    } else {
+      ElMessage.error(res.message || '发送失败，请重试')
+      fetchCaptcha()
+      formData.captchaText = ''
+    }
   } catch (error: any) {
-    ElMessage.error(error.response?.data?.msg || '发送失败，请重试')
+    ElMessage.error(error.response?.data?.message || '发送失败，请重试')
     fetchCaptcha() // Refresh captcha on failure
     formData.captchaText = ''
   } finally {
@@ -75,12 +82,20 @@ const handleSendCode = async () => {
 }
 
 const startCountdown = () => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+
   countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
+  countdownTimer = setInterval(() => {
+    if (countdown.value <= 1) {
+      countdown.value = 0
+      clearInterval(countdownTimer as ReturnType<typeof setInterval>)
+      countdownTimer = null
+      return
     }
+    countdown.value--
   }, 1000)
 }
 
@@ -92,15 +107,19 @@ const handleRegister = async () => {
       if (loading.value) return
       loading.value = true
       try {
-        await register({
+        const res = await register({
           email: formData.email,
           emailCode: formData.emailCode,
           password: formData.password
         })
-        ElMessage.success('注册成功')
-        emit('switch-to-login')
+        if (res.code === 200) {
+          ElMessage.success(res.message || '注册成功')
+          emit('switch-to-login')
+        } else {
+          ElMessage.error(res.message || '注册失败')
+        }
       } catch (error: any) {
-        ElMessage.error(error.response?.data?.msg || '注册失败')
+        ElMessage.error(error.response?.data?.message || '注册失败')
       } finally {
         loading.value = false
       }
@@ -139,6 +158,17 @@ watch(() => props.show, (newVal) => {
       password: ''
     })
     countdown.value = 0
+    if (countdownTimer) {
+      clearInterval(countdownTimer)
+      countdownTimer = null
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
   }
 })
 
@@ -218,13 +248,14 @@ const rules = {
               maxlength="6" 
               class="captcha-input"
             />
-            <el-button 
-              type="default" 
+            <el-button
+              type="primary"
               class="send-code-btn"
-              :disabled="sendingCode || countdown > 0" 
+              :disabled="sendingCode || countdown > 0"
               @click="handleSendCode"
+              :loading="sendingCode"
             >
-              {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+              {{ countdown > 0 ? `${countdown}s后重试` : '发送验证码' }}
             </el-button>
           </div>
         </el-form-item>
@@ -336,6 +367,8 @@ const rules = {
 .send-code-btn:disabled {
   background: rgba(255, 255, 255, 0.05);
   color: #8a8b8e;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .primary-btn {
