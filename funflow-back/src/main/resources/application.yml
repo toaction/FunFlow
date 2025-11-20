@@ -48,8 +48,3 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
-# 应用配置
-app:
-  email:
-    code:
-      subject: FunFlow 验证码

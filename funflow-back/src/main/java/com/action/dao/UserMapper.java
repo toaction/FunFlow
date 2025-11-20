@@ -26,6 +26,17 @@ public interface UserMapper {
     int countByEmail(@Param("email") String email);
 
     /**
+     * 根据邮箱查询用户信息（包含所有状态的用户）
+     *
+     * @param email 邮箱地址（小写）
+     * @return 用户实体
+     */
+    @Select("SELECT user_id, username, nickname, email, password_hash, avatar, bio, " +
+            "following_count, follower_count, cached_total_likes, status, created_at, updated_at " +
+            "FROM `user` WHERE email = #{email} AND deleted_at IS NULL")
+    User selectByEmail(@Param("email") String email);
+
+    /**
      * 插入用户记录
      *
      * @param user 用户实体

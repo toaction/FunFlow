@@ -61,9 +61,13 @@ const handleLogin = async () => {
         if (res.code === 200) {
           authStore.setToken(res.data.accessToken)
           ElMessage.success('登录成功')
+          // 登录成功后刷新验证码，为下次登录做准备
+          fetchCaptcha()
           handleClose()
         } else {
           ElMessage.error(res.message || '登录失败，请检查用户名或密码')
+          // 登录失败也刷新验证码
+          fetchCaptcha()
         }
       } catch (error) {
         ElMessage.error('登录失败，请检查用户名或密码')

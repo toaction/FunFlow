@@ -1,11 +1,13 @@
 package com.action.controller;
 
 import com.action.common.Result;
+import com.action.domain.dto.LoginRequest;
 import com.action.domain.dto.RegisterRequest;
 import com.action.domain.dto.SendEmailCodeRequest;
-import com.action.domain.vo.CaptchaVO;
 import com.action.service.AuthService;
 import com.action.service.CaptchaService;
+import com.action.domain.vo.CaptchaVO;
+import com.action.domain.vo.LoginVO;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,5 +71,18 @@ public class AuthController {
         log.info("用户注册请求，邮箱: {}", request.getEmail());
         authService.register(request);
         return Result.success();
+    }
+
+    /**
+     * 用户登录
+     *
+     * @param request 登录请求
+     * @return 登录结果
+     */
+    @PostMapping("/login")
+    public Result<LoginVO> login(@Valid @RequestBody LoginRequest request) {
+        log.info("用户登录请求，邮箱: {}", request.getEmail());
+        LoginVO loginVO = authService.login(request);
+        return Result.success(loginVO);
     }
 }

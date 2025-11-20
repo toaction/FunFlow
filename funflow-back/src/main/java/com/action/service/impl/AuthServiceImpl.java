@@ -10,12 +10,17 @@ import com.action.service.AuthService;
 import com.action.service.EmailService;
 
 import cn.hutool.crypto.digest.BCrypt;
+import com.action.domain.dto.LoginRequest;
+import com.action.domain.vo.LoginVO;
+import com.action.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
     
     @Override
     public void sendEmailCode(SendEmailCodeRequest request) {
@@ -203,6 +211,73 @@ public class AuthServiceImpl implements AuthService {
                 RedisConstants.EMAIL_CODE_EXPIRE_SECONDS,
                 TimeUnit.SECONDS
         );
+    }
+
+    @Override
+    public LoginVO login(LoginRequest request) {
+        String email = request.getEmail().toLowerCase();
+        String password = request.getPassword();
+        String captchaId = request.getCaptchaId();
+        String captchaText = request.getCaptchaText();
+
+        // 1. 校验图形验证码
+        validateCaptcha(captchaId, captchaText);
+
+        // 2. 验证用户凭证
+        User user = validateUserCredentials(email, password);
+
+        // 3. 生成 JWT 令牌
+        String accessToken = generateAccessToken(user);
+
+        log.info("用户登录成功，邮箱: {}, 用户ID: {}", email, user.getUserId());
+
+        LoginVO loginVO = new LoginVO();
+        loginVO.setAccessToken(accessToken);
+        return loginVO;
+    }
+
+    /**
+     * 验证用户凭证
+     *
+     * @param email    邮箱
+     * @param password 明文密码
+     * @return 用户对象
+     */
+    private User validateUserCredentials(String email, String password) {
+        // 根据邮箱查询用户
+        User user = userMapper.selectByEmail(email);
+
+        // 用户不存在
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 密码不匹配
+        if (!BCrypt.checkpw(password, user.getPasswordHash())) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 用户状态异常
+        if (user.getStatus() != 1) {
+            throw new BusinessException("账号异常，请联系客服");
+        }
+
+        return user;
+    }
+
+    /**
+     * 生成 JWT 访问令牌
+     *
+     * @param user 用户对象
+     * @return accessToken
+     */
+    private String generateAccessToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getUserId());
+        claims.put("email", user.getEmail());
+        claims.put("username", user.getUsername());
+
+        return jwtUtil.generateAccessToken(claims);
     }
 }
 

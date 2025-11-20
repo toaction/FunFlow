@@ -26,16 +26,13 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
     
-    @Value("${app.email.code.subject:FunFlow 验证码}")
-    private String subject;
-    
     @Override
     public void sendEmailCode(String to, String code) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(to);
-            message.setSubject(subject);
+            message.setSubject("FunFlow 验证码");
             message.setText(buildEmailContent(code));
             
             mailSender.send(message);

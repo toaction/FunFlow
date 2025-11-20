@@ -1,7 +1,9 @@
 package com.action.service;
 
+import com.action.domain.dto.LoginRequest;
 import com.action.domain.dto.RegisterRequest;
 import com.action.domain.dto.SendEmailCodeRequest;
+import com.action.domain.vo.LoginVO;
 
 /**
  * 认证服务接口
@@ -24,5 +26,13 @@ public interface AuthService {
      * @param request 注册请求
      */
     void register(RegisterRequest request);
+
+    /**
+     * 用户登录
+     *
+     * @param request 登录请求
+     * @return 登录结果（包含JWT令牌）
+     */
+    LoginVO login(LoginRequest request);
 }
 
