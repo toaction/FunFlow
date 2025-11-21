@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 认证控制器
  * 处理登录、注册等认证相关接口
+ * https://github.com/toaction/FunFlow/issues/6
  *
  * @author Xiangfu
  * @date 2025-11-20
