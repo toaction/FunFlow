@@ -181,11 +181,11 @@
 - 立即删除 Redis 中的该 `captchaId`。
 3. 验证用户凭证：
 - 根据 `email` 从数据库查询用户记录。
-- 如果用户不存在，返回模糊错误：“用户名或密码错误”。
+- 如果用户不存在，返回模糊错误："用户名或密码错误"。
 - 使用相同的加密算法比对用户输入的密码和数据库存储的哈希密码。
-- 如果密码不匹配，返回模糊错误：“用户名或密码错误”。
+- 如果密码不匹配，返回模糊错误："用户名或密码错误"。
 4. 生成JWT令牌：包含用户ID、角色等信息。
-5. 返回令牌：将 Token 返回给前端。
+5. 返回令牌和用户信息：将 JWT Token 和用户信息一同返回给前端。
 
 **响应体：**
 ```json
@@ -193,7 +193,12 @@
   "code": 200,
   "msg": "登录成功",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "username": "user@example.com",
+      "nickname": "user",
+      "avatar": ""
+    }
   }
 }
 ```
@@ -228,3 +233,14 @@
 2. 清除内存状态
 3. 重置页面状态
 4. 跳转处理
+
+## 原型图
+
+### 注册
+![用户注册](../../pictures/prototypes/user_register.png)
+
+### 登录
+![用户登录](../../pictures/prototypes/user_login.png)
+
+### 退出登录
+![用户退出登录](../../pictures/prototypes/user_logout.png)

@@ -13,6 +13,17 @@ export interface LoginData {
   captchaText: string
 }
 
+export interface UserInfo {
+  username: string
+  nickname: string
+  avatar: string
+}
+
+export interface LoginResponse {
+  accessToken: string
+  user: UserInfo
+}
+
 export interface RegisterData {
   email: string
   emailCode: string
@@ -40,7 +51,12 @@ export function register(data: RegisterData) {
   return request.post<any, ApiResponse<null>>('/auth/register', data)
 }
 
+/**
+ * 用户登录
+ * @param data 登录数据
+ * @returns 登录响应数据（包含token和用户信息）
+ */
 export function login(data: LoginData) {
-  return request.post<any, ApiResponse<{ accessToken: string }>>('/auth/login', data)
+  return request.post<any, ApiResponse<LoginResponse>>('/auth/login', data)
 }
 

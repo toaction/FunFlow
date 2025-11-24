@@ -30,7 +30,7 @@ spring:
     host: smtp.163.com
     port: 465
     username: liuxiangfu2002@163.com
-    password: ZJrRU3ApdfBpYUhj # SMTP 授权码
+    password: # SMTP 授权码
     default-encoding: UTF-8
     properties:
       mail:
