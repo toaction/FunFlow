@@ -1,5 +1,6 @@
 package com.action.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.action.common.RedisConstants;
 import com.action.dao.UserMapper;
 import com.action.domain.dto.RegisterRequest;
@@ -54,13 +55,12 @@ public class AuthServiceImpl implements AuthService {
         
         // 1. 校验图形验证码
         validateCaptcha(captchaId, captchaText);
-        
-        // 2. 校验邮箱格式（DTO 已经校验过，这里再次确认）
-        // 3. 校验邮箱是否已被注册
+
+        // 2. 校验邮箱是否已被注册
         validateEmailNotRegistered(email);
         
-        // 4. 生成并发送邮件验证码
-        String emailCode = generateEmailCode();
+        // 3. 生成 6 位数字并发送邮件验证码
+        String emailCode = RandomUtil.randomNumbers(6);
         saveEmailCodeToRedis(email, emailCode);
         emailService.sendEmailCode(email, emailCode);
         
@@ -155,7 +155,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(email);
         user.setUsername(email); // 用户名默认使用邮箱
         user.setNickname(extractNicknameFromEmail(email)); // 昵称从邮箱中提取
-        user.setAvatar("default-avatar.jpg"); // 默认头像
+        user.setAvatar(""); // 默认头像为空
         user.setBio(""); // 默认简介为空
         user.setPasswordHash(BCrypt.hashpw(password)); // 密码加密
         user.setStatus(1); // 正常状态
@@ -163,7 +163,8 @@ public class AuthServiceImpl implements AuthService {
         user.setFollowerCount(0);
         user.setCachedTotalLikes(0L);
         user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setLastLoginAt(null); // 注册时为空，登录时更新
+        user.setDeletedAt(null); // 软删除字段，初始为空
 
         userMapper.insert(user);
 
@@ -183,18 +184,6 @@ public class AuthServiceImpl implements AuthService {
             return email.substring(0, atIndex);
         }
         return email;
-    }
-
-    
-    /**
-     * 生成6位数字验证码
-     *
-     * @return 验证码
-     */
-    private String generateEmailCode() {
-        Random random = new Random();
-        int code = 100000 + random.nextInt(900000); // 生成 100000-999999 之间的6位数字
-        return String.valueOf(code);
     }
     
     /**
@@ -226,7 +215,10 @@ public class AuthServiceImpl implements AuthService {
         // 2. 验证用户凭证
         User user = validateUserCredentials(email, password);
 
-        // 3. 生成 JWT 令牌
+        // 3. 更新最后登录时间
+        updateLastLoginTime(user.getUserId());
+
+        // 4. 生成 JWT 令牌
         String accessToken = generateAccessToken(user);
 
         log.info("用户登录成功，邮箱: {}, 用户ID: {}", email, user.getUserId());
@@ -278,6 +270,15 @@ public class AuthServiceImpl implements AuthService {
         claims.put("username", user.getUsername());
 
         return jwtUtil.generateAccessToken(claims);
+    }
+
+    /**
+     * 更新用户最后登录时间
+     *
+     * @param userId 用户ID
+     */
+    private void updateLastLoginTime(Long userId) {
+        userMapper.updateLastLoginAt(userId, LocalDateTime.now());
     }
 }
 

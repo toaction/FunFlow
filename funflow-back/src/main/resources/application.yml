@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/fun_flow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: 123456
+    password: 12345678
   
   # Redis 配置
   data:
@@ -30,7 +30,7 @@ spring:
     host: smtp.163.com
     port: 465
     username: liuxiangfu2002@163.com
-    password: # SMTP 授权码
+    password: ZJrRU3ApdfBpYUhj # SMTP 授权码
     default-encoding: UTF-8
     properties:
       mail:

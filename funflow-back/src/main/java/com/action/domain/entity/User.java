@@ -15,9 +15,19 @@ import java.time.LocalDateTime;
 public class User {
 
     /**
-     * 用户ID
+     * 用户ID（主键）
      */
     private Long userId;
+
+    /**
+     * 邮箱账号（唯一，应用层统一转小写存储）
+     */
+    private String email;
+
+    /**
+     * 密码哈希
+     */
+    private String passwordHash;
 
     /**
      * 头像URL
@@ -30,7 +40,7 @@ public class User {
     private String nickname;
 
     /**
-     * 账号（唯一，统一小写）
+     * 账号（唯一，应用层统一转小写存储）
      */
     private String username;
 
@@ -45,7 +55,7 @@ public class User {
     private Integer followerCount;
 
     /**
-     * 获赞量缓存
+     * 获赞量（缓存）
      */
     private Long cachedTotalLikes;
 
@@ -55,24 +65,9 @@ public class User {
     private String bio;
 
     /**
-     * 邮箱（唯一，统一小写）
-     */
-    private String email;
-
-    /**
-     * 密码哈希
-     */
-    private String passwordHash;
-
-    /**
      * 创建时间
      */
     private LocalDateTime createdAt;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updatedAt;
 
     /**
      * 最后登录时间
@@ -85,7 +80,7 @@ public class User {
     private Integer status;
 
     /**
-     * 删除时间（NULL 表示未删除）
+     * 注销时间（软删除，NULL 表示未删除）
      */
     private LocalDateTime deletedAt;
 }
