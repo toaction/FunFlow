@@ -1,26 +1,46 @@
-# 用户表设计
-
 ## 需求分析
-展示的用户个人信息包括：
-- 头像
-- 昵称
-- 账号（唯一）
-- 关注数
-- 粉丝数
-- 获赞量
-- 个人简介
 
-隐藏信息包括：
-- 邮箱账号（唯一）
-- 密码
+**包含字段：**
+- 主键 user_id
+- 用户在进行账号注册时，需提供邮箱和密码，密码以密文形式存储
+- 在个人主页展示的用户信息包括：头像、昵称、账号、关注数、粉丝数、作品总获赞量、个人简介
+- 需记录账号状态，包括：创建时间、最后登录时间、状态（正常、禁用）、注销时间（账号注销与恢复）
+
+**字段约束：**
+- 非空：id、邮箱、密码哈希、昵称、账号、关注数、粉丝数、获赞量、创建时间、最后登录时间、状态
+- 唯一：id、邮箱、账号
+
+**字段说明：**
+- 用户名/邮箱：应用层统一转小写存储，避免大小写问题
+- 关注数/粉丝数：作为冗余字段存储在用户表中，通过事务保证一致性
+- 获赞量：使用 `BIGINT` 类型的 `cached_total_likes` 缓存字段，通过定时任务更新，支持更大数值
+- 密码：存储密码哈希而非明文，增强安全性
+- 状态：`1` 表示正常，`0` 表示禁用
+- 软删除：通过 `deleted_at` 字段实现，`NULL` 表示未删除，有值表示删除时间；支持数据恢复
+
+## 索引
+UNIQUE 索引：账号和邮箱的 UNIQUE 约束已自动创建索引，无需重复
+
+联合索引：建立 `idx_status_deleted` 联合索引，快速查询正常用户
+ ```sql
+ -- 查询正常用户（最常见，99%的查询）
+WHERE status = 1 AND deleted_at IS NULL
+
+-- 查询禁用用户
+WHERE status = 0 AND deleted_at IS NULL
+ ```
 
 ## 表设计
 ```sql
 CREATE TABLE user (
     user_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
+
+    -- 隐藏信息
+    email VARCHAR(100) NOT NULL UNIQUE COMMENT '邮箱账号（唯一，应用层统一转小写存储）',
+    password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
     
     -- 展示信息
-    avatar VARCHAR(255) NOT NULL DEFAULT 'default-avatar.jpg' COMMENT '头像URL',
+    avatar VARCHAR(255) COMMENT '头像URL',
     nickname VARCHAR(30) NOT NULL COMMENT '昵称',
     username VARCHAR(50) NOT NULL UNIQUE COMMENT '账号（唯一，应用层统一转小写存储）',
     following_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '关注数',
@@ -28,43 +48,18 @@ CREATE TABLE user (
     cached_total_likes BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '获赞量（缓存）',
     bio TEXT COMMENT '个人简介',
     
-    -- 隐藏信息
-    email VARCHAR(100) NOT NULL UNIQUE COMMENT '邮箱账号（唯一，应用层统一转小写存储）',
-    password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
-    
     -- 系统字段
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     last_login_at TIMESTAMP NULL COMMENT '最后登录时间',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-正常，0-禁用',
-    deleted_at TIMESTAMP NULL COMMENT '删除时间（软删除）',
+    deleted_at TIMESTAMP NULL COMMENT '注销时间（软删除）',
     
     -- 索引（注意：UNIQUE 约束已自动创建索引，无需重复添加）
     INDEX idx_status_deleted (status, deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 ```
 
-### 字段说明
-- **用户名/邮箱**：应用层统一转小写存储，避免大小写问题
-- **关注数/粉丝数**：作为冗余字段存储在用户表中，通过事务保证一致性
-- **获赞量**：使用 `BIGINT` 类型的 `cached_total_likes` 缓存字段，通过定时任务更新，支持更大数值
-- **密码**：存储密码哈希而非明文，增强安全性
-- **状态**：`1` 表示正常，`0` 表示禁用（封禁、冻结等）
-- **软删除**：通过 `deleted_at` 字段实现，`NULL` 表示未删除，有值表示删除时间；支持数据恢复
-
-### 索引说明
-- **UNIQUE 索引**：`username` 和 `email` 的 UNIQUE 约束已自动创建索引，无需重复
-- **idx_status_deleted**：联合索引 `(status, deleted_at)` 是最核心的索引，支持以下高频查询：
-  ```sql
-  -- 查询正常用户（最常见，99%的查询）
-  WHERE status = 1 AND deleted_at IS NULL
-  
-  -- 查询禁用用户
-  WHERE status = 0 AND deleted_at IS NULL
-  ```
-
 ## 设计决策
-
 ### 为什么获赞量是一个 cache，而非实时更新的字段？
 直接在用户表中添加一个 `total_likes` 字段，属于“反范式化”设计。虽然它可能在查询时非常快，但会带来一系列严重的问题：
 - 点赞/取消属于频繁的写入操作。如果获赞量单独存储，每当视频的点赞数发生变化，都需要同时更新两个表：视频表和用户表。
@@ -96,7 +91,7 @@ CREATE TABLE user (
 2. **成本收益比**：
    - 添加索引的成本：每次 INSERT/UPDATE/DELETE 都要维护额外索引，增加写入开销
    - 收益：仅对低频查询（定时任务）有优化，但即使全表扫描也能在秒级完成
-   
+
 3. **联合索引的妥协方案**：
    - 虽然 `idx_status_deleted` 无法完美覆盖 `WHERE deleted_at IS NOT NULL`
    - 但 MySQL 仍可扫描此索引（比全表扫描快），性能可接受
