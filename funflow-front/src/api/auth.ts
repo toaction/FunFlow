@@ -21,7 +21,6 @@ export interface UserInfo {
 
 export interface LoginResponse {
   accessToken: string
-  user: UserInfo
 }
 
 export interface RegisterData {

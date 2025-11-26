@@ -7,6 +7,7 @@ import { ElInput, ElButton, ElAvatar, ElIcon, ElMessageBox, ElMessage } from 'el
 
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
+const isTokenPresent = computed(() => authStore.isTokenPresent)
 const searchQuery = ref('')
 const isDropdownOpen = ref(false)
 const displayName = computed(() => authStore.getDisplayName())
@@ -98,9 +99,14 @@ onUnmounted(() => {
     </div>
 
     <div class="user-section">
-      <div v-if="isLoggedIn" class="user-dropdown-wrapper">
+      <div v-if="isTokenPresent" class="user-dropdown-wrapper">
         <div class="user-avatar-wrapper" @click="handleAvatarClick">
-          <el-avatar :icon="UserFilled" class="user-avatar" :size="40" />
+          <el-avatar
+            :icon="UserFilled"
+            :src="authStore.user?.avatar"
+            class="user-avatar"
+            :size="40"
+          />
         </div>
 
         <!-- 下拉菜单 -->

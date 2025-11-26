@@ -226,13 +226,6 @@ public class AuthServiceImpl implements AuthService {
         LoginVO loginVO = new LoginVO();
         loginVO.setAccessToken(accessToken);
 
-        // 设置用户信息
-        LoginVO.UserInfo userInfo = new LoginVO.UserInfo();
-        userInfo.setUsername(user.getUsername());
-        userInfo.setNickname(user.getNickname());
-        userInfo.setAvatar(user.getAvatar());
-        loginVO.setUser(userInfo);
-
         return loginVO;
     }
 

@@ -184,8 +184,7 @@
 - 如果用户不存在，返回模糊错误："用户名或密码错误"。
 - 使用相同的加密算法比对用户输入的密码和数据库存储的哈希密码。
 - 如果密码不匹配，返回模糊错误："用户名或密码错误"。
-4. 生成JWT令牌：包含用户ID、角色等信息。
-5. 返回令牌和用户信息：将 JWT Token 和用户信息一同返回给前端。
+4. 返回 JWT 令牌：包含用户 ID 等信息，并更新用户最后登录时间。
 
 **响应体：**
 ```json
@@ -193,12 +192,40 @@
   "code": 200,
   "msg": "登录成功",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "username": "user@example.com",
-      "nickname": "user",
-      "avatar": ""
-    }
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+### 第三步：获取用户信息（页面初始化时）
+**目的**：前端获取 JWT 后，在页面初始化时调用用户信息接口，获取用户详细信息用于 UI 显示。
+
+**接口：**`GET /api/user/{id}`
+
+**前端：**
+1. 页面初始化：检查是否有有效的 JWT 令牌。
+2. 调用接口：如果有 JWT，则调用 `GET /api/user/current` 获取用户信息。
+3. 状态更新：将获取到的用户信息存入状态管理器，更新 UI 显示。
+4. 错误处理：如果 JWT 无效或过期，清除本地令牌，显示登录按钮。
+
+**后端：**
+1. JWT 验证：从请求头中解析 JWT 令牌，验证有效性和用户身份。
+2. 查询用户：根据 JWT 中的用户 ID 从数据库查询用户信息。
+3. 返回信息：返回用户基本信息（用户名、昵称、头像等）。
+
+**响应体：**
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "avator": "https://example.com/avatar.png",
+    "nickname": "Example User",
+    "username": "example@example.com"
+    "followingCount": 10,
+    "followerCount": 5,
+    "cachedTotalLikes": 20,
+    "bio": "This is an example bio."
   }
 }
 ```

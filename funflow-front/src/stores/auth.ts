@@ -1,26 +1,28 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { UserInfo } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'))
   const user = ref<UserInfo | null>(null)
-  const isLoggedIn = ref(!!token.value)
+  const isLoggedIn = computed(() => !!token.value && !!user.value)
 
   function setToken(newToken: string) {
     token.value = newToken
     localStorage.setItem('token', newToken)
-    isLoggedIn.value = true
   }
 
   function setUser(userInfo: UserInfo) {
     user.value = userInfo
   }
 
+  function clearUser() {
+    user.value = null
+  }
+
   function logout() {
     token.value = null
     user.value = null
-    isLoggedIn.value = false
     localStorage.removeItem('token')
   }
 
@@ -34,12 +36,17 @@ export const useAuthStore = defineStore('auth', () => {
     return '用户'
   }
 
+  // 初始化时检查 token，如果有 token 则认为已登录（等待用户信息加载）
+  const isTokenPresent = computed(() => !!token.value)
+
   return {
     token,
     user,
     isLoggedIn,
+    isTokenPresent,
     setToken,
     setUser,
+    clearUser,
     logout,
     getDisplayName
   }
