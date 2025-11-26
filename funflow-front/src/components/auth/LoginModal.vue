@@ -60,6 +60,8 @@ const handleLogin = async () => {
         const res = await login(formData)
         if (res.code === 200) {
           authStore.setToken(res.data.accessToken)
+          // 登录成功后获取用户信息
+          await authStore.fetchUserProfile()
           ElMessage.success('登录成功')
           // 登录成功后刷新验证码，为下次登录做准备
           fetchCaptcha()

@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import TopNavbar from './TopNavbar.vue'
 import SideNavbar from './SideNavbar.vue'
 import LoginModal from '@/components/auth/LoginModal.vue'
 import RegisterModal from '@/components/auth/RegisterModal.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 const showLogin = ref(false)
 const showRegister = ref(false)
 
@@ -26,6 +30,23 @@ const closeLogin = () => {
 const closeRegister = () => {
   showRegister.value = false
 }
+
+// 监听路由变化，检查访问权限
+watch(() => route.path, (newPath) => {
+  // 如果访问个人中心但未登录，弹出登录弹窗
+  if (newPath === '/profile' && !authStore.token) {
+    showLogin.value = true
+    // 可以选择是否重定向回首页
+    // router.push('/')
+  }
+}, { immediate: true })
+
+// 应用启动时检查用户登录状态
+onMounted(async () => {
+  if (authStore.token && !authStore.user) {
+    await authStore.fetchUserProfile()
+  }
+})
 </script>
 
 <template>

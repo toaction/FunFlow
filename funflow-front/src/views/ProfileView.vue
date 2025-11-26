@@ -6,31 +6,32 @@
       <section class="user-info-card">
         <div class="user-header">
           <div class="user-avatar-large">
-            <svg viewBox="0 0 24 24" fill="white">
+            <img v-if="userInfo.avatar" :src="userInfo.avatar" alt="用户头像" />
+            <svg v-else viewBox="0 0 24 24" fill="white">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
           <div class="user-basic-info">
             <div class="user-nickname-wrapper">
-              <h1 class="user-nickname">FunFlow</h1>
+              <h1 class="user-nickname">{{ userInfo.nickname }}</h1>
               <button class="edit-profile-btn" title="编辑个人资料" @click="editProfile">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                 </svg>
               </button>
             </div>
-            <div class="user-account">账号：<span>funflow2025</span></div>
+            <div class="user-account">账号：<span>{{ userInfo.username }}</span></div>
             <div class="user-stats">
               <div class="stat-item" @click="viewFollowing">
-                <div class="stat-number">{{ userInfo.following }}</div>
+                <div class="stat-number">{{ formatCount(userInfo.following) }}</div>
                 <div class="stat-label">关注</div>
               </div>
               <div class="stat-item" @click="viewFollowers">
-                <div class="stat-number">{{ userInfo.followers }}</div>
+                <div class="stat-number">{{ formatCount(userInfo.followers) }}</div>
                 <div class="stat-label">粉丝</div>
               </div>
               <div class="stat-item" @click="viewLikes">
-                <div class="stat-number">{{ userInfo.totalLikes }}</div>
+                <div class="stat-number">{{ formatCount(userInfo.totalLikes) }}</div>
                 <div class="stat-label">获赞</div>
               </div>
             </div>
@@ -173,20 +174,34 @@
         </div>
       </section>
     </main>
+
+    <!-- 编辑个人信息弹窗 -->
+    <EditProfileModal v-model="showEditModal" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-const activeTab = ref('works')
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessage } from 'element-plus'
+import EditProfileModal from '@/components/user/EditProfileModal.vue'
 
-// 用户信息
-const userInfo = reactive({
-  following: 128,
-  followers: 2500,
-  totalLikes: 15800,
-  bio: '热爱生活，分享快乐 ✨ 记录生活中的美好瞬间 📸 欢迎关注交流 💫'
-})
+const authStore = useAuthStore()
+const router = useRouter()
+const activeTab = ref('works')
+const showEditModal = ref(false)
+
+// 用户信息 - 使用store中的真实数据
+const userInfo = computed(() => ({
+  nickname: authStore.user?.nickname || 'FunFlow',
+  username: authStore.user?.username || 'funflow2025',
+  avatar: authStore.user?.avatar || '',
+  following: authStore.user?.followingCount || 0,
+  followers: authStore.user?.followerCount || 0,
+  totalLikes: authStore.user?.cachedTotalLikes || 0,
+  bio: authStore.user?.bio || '这个人很懒，什么都没有留下～'
+}))
 
 // 用户作品数据
 const userWorks = reactive({
@@ -223,8 +238,7 @@ const switchTab = (tab: string) => {
 }
 
 const editProfile = () => {
-  console.log('编辑个人资料')
-  // 这里可以添加打开编辑个人资料弹窗的逻辑
+  showEditModal.value = true
 }
 
 const viewFollowing = () => {
@@ -254,12 +268,34 @@ const openFolder = (folder: any) => {
 
 const formatCount = (count: number): string => {
   if (count >= 10000) {
-    return (count / 1000).toFixed(1) + 'K'
+    return (count / 10000).toFixed(1) + 'w'
   } else if (count >= 1000) {
-    return (count / 1000).toFixed(1) + 'K'
+    return (count / 1000).toFixed(1) + 'k'
   }
   return count.toString()
 }
+
+// 组件挂载时获取用户信息并检查登录状态
+onMounted(async () => {
+  // 检查是否已登录
+  if (!authStore.token) {
+    ElMessage.warning('请先登录')
+    router.push('/')
+    return
+  }
+
+  // 如果有token但没有用户信息，获取用户信息
+  if (!authStore.user) {
+    try {
+      await authStore.fetchUserProfile()
+    } catch (error) {
+      ElMessage.error('获取用户信息失败，请重新登录')
+      authStore.logout()
+      router.push('/')
+      return
+    }
+  }
+})
 </script>
 
 <style scoped>

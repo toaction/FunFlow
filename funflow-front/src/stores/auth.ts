@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { UserInfo } from '@/api/auth'
+import { getUserProfile } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'))
@@ -26,6 +27,21 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('token')
   }
 
+  async function fetchUserProfile() {
+    if (!token.value) return
+
+    try {
+      const response = await getUserProfile()
+      if (response.code === 200) {
+        setUser(response.data)
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      // 如果获取用户信息失败，可能token已过期，清除登录状态
+      logout()
+    }
+  }
+
   function getDisplayName(): string {
     if (user.value?.nickname) {
       return user.value.nickname
@@ -48,7 +64,8 @@ export const useAuthStore = defineStore('auth', () => {
     setUser,
     clearUser,
     logout,
-    getDisplayName
+    getDisplayName,
+    fetchUserProfile
   }
 })
 

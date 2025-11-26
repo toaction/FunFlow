@@ -17,7 +17,15 @@ export interface UserInfo {
   username: string
   nickname: string
   avatar: string
+  followingCount?: number
+  followerCount?: number
+  cachedTotalLikes?: number
+  bio?: string
+  email?: string
+  createdAt?: string
+  updatedAt?: string
 }
+
 
 export interface LoginResponse {
   accessToken: string
@@ -57,5 +65,13 @@ export function register(data: RegisterData) {
  */
 export function login(data: LoginData) {
   return request.post<any, ApiResponse<LoginResponse>>('/auth/login', data)
+}
+
+/**
+ * 获取用户信息
+ * @returns 用户信息响应数据
+ */
+export function getUserProfile() {
+  return request.get<any, ApiResponse<UserInfo>>('/user')
 }
 

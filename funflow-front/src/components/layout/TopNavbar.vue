@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import logoImg from '@/assets/logo.jpeg'
 import { Search, UserFilled, SwitchButton } from '@element-plus/icons-vue'
 import { ElInput, ElButton, ElAvatar, ElIcon, ElMessageBox, ElMessage } from 'element-plus'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const isTokenPresent = computed(() => authStore.isTokenPresent)
 const searchQuery = ref('')
@@ -22,6 +24,7 @@ const handleLoginClick = () => {
 const handleAvatarClick = () => {
   isDropdownOpen.value = !isDropdownOpen.value
 }
+
 
 const handleLogout = async () => {
   try {
@@ -43,6 +46,9 @@ const handleLogout = async () => {
       type: 'success',
       duration: 2000,
     })
+
+    // 退出登录后跳转到首页推荐页面
+    router.push('/')
   } catch {
     // 用户取消退出
   }
@@ -68,9 +74,14 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 // 生命周期钩子
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleKeydown)
+
+  // 如果有token但没有用户信息，则获取用户信息
+  if (authStore.token && !authStore.user) {
+    await authStore.fetchUserProfile()
+  }
 })
 
 onUnmounted(() => {
@@ -115,7 +126,7 @@ onUnmounted(() => {
             <!-- 箭头 -->
             <div class="dropdown-arrow"></div>
 
-            <!-- 用户信息区域 -->
+            <!-- 用户信息展示区域（不可点击） -->
             <div class="user-info">
               <div class="info-avatar">
                 <el-avatar
@@ -308,7 +319,7 @@ onUnmounted(() => {
   z-index: -1;
 }
 
-/* 用户信息区域 */
+/* 用户信息展示区域 */
 .user-info {
   display: flex;
   align-items: center;
@@ -316,6 +327,7 @@ onUnmounted(() => {
   padding: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(102, 126, 234, 0.05);
+  transition: all 0.2s;
 }
 
 .info-avatar {
@@ -341,6 +353,7 @@ onUnmounted(() => {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.6);
 }
+
 
 /* 退出登录区域 */
 .logout-section {
