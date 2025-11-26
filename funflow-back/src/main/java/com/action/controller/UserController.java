@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 用户控制器
  * 处理用户信息相关接口
- * https://github.com/toaction/FunFlow/issues/9
  *
  * @author Xiangfu
  * @date 2025-11-26
@@ -27,11 +26,12 @@ public class UserController {
 
     /**
      * 获取用户信息
+     * https://github.com/toaction/FunFlow/issues/9
      *
      * @return 用户信息
      */
-    @GetMapping()
-    public Result<UserVO> getUser() {
+    @GetMapping("/profile")
+    public Result<UserVO> getUserProfile() {
         log.info("获取用户信息请求");
         UserVO userVO = userService.getCurrentUser();
         return Result.success(userVO);

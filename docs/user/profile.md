@@ -6,7 +6,7 @@
 - 点击修改个人信息按钮，弹出修改信息框，展示头像、账号、昵称、个人简介信息
 
 ### 接口定义
-- 获取用户信息：`GET /api/user`
+- 获取用户信息：`GET /api/user/profile`
 
 前端请求需携带 JWT 令牌：
 ```json
@@ -21,7 +21,7 @@
     "code": 200,
     "msg": "success",
     "data": {
-        "avator": "https://example.com/avatar.png",
+        "avatar": "https://example.com/avatar.png",
         "nickname": "Example User",
         "username": "example@example.com",
         "followingCount": 10,

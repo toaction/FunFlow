@@ -15,7 +15,7 @@ public class UserVO {
     /**
      * 头像URL
      */
-    private String avator;
+    private String avatar;
 
     /**
      * 昵称

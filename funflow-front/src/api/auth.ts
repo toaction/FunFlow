@@ -72,6 +72,6 @@ export function login(data: LoginData) {
  * @returns 用户信息响应数据
  */
 export function getUserProfile() {
-  return request.get<any, ApiResponse<UserInfo>>('/user')
+  return request.get<any, ApiResponse<UserInfo>>('/user/profile')
 }
 
