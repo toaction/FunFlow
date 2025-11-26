@@ -55,6 +55,19 @@ public interface UserMapper {
     int insert(User user);
 
     /**
+     * 根据用户ID查询用户信息
+     * 查询条件：status = 1 AND deleted_at IS NULL
+     *
+     * @param userId 用户ID
+     * @return 用户实体
+     */
+    @Select("SELECT user_id, email, password_hash, avatar, nickname, username, " +
+            "following_count, follower_count, cached_total_likes, bio, created_at, " +
+            "last_login_at, status, deleted_at " +
+            "FROM `user` WHERE user_id = #{userId} AND status = 1 AND deleted_at IS NULL")
+    User selectByUserId(@Param("userId") Long userId);
+
+    /**
      * 更新用户最后登录时间
      *
      * @param userId 用户ID
