@@ -44,9 +44,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-    
+        
     @Override
     public void sendEmailCode(SendEmailCodeRequest request) {
         String email = request.getEmail().toLowerCase();
@@ -270,7 +268,7 @@ public class AuthServiceImpl implements AuthService {
         claims.put("email", user.getEmail());
         claims.put("username", user.getUsername());
 
-        return jwtUtil.generateAccessToken(claims);
+        return JwtUtil.generateAccessToken(claims);
     }
 
     /**

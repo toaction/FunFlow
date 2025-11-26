@@ -3,7 +3,6 @@ package com.action.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -16,7 +15,6 @@ import java.util.Map;
  * @author Xiangfu
  * @date 2025-11-20
  */
-@Component
 public class JwtUtil {
 
     // JWT 密钥（建议从配置文件读取，这里简化处理）
@@ -25,11 +23,11 @@ public class JwtUtil {
     // accessToken 过期时间：7天
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000;
 
-    private final SecretKey key;
+    private static final SecretKey KEY;
 
-    public JwtUtil() {
+    static {
         // 使用 HS256 算法，密钥长度至少 32 字节
-        this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     /**
@@ -38,7 +36,7 @@ public class JwtUtil {
      * @param claims 载荷数据
      * @return accessToken
      */
-    public String generateAccessToken(Map<String, Object> claims) {
+    public static String generateAccessToken(Map<String, Object> claims) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
 
@@ -46,7 +44,7 @@ public class JwtUtil {
                 .claims(claims)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(key)
+                .signWith(KEY)
                 .compact();
     }
 
@@ -56,9 +54,9 @@ public class JwtUtil {
      * @param token JWT 令牌
      * @return Claims
      */
-    public Claims parseToken(String token) {
+    public static Claims parseToken(String token) {
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(KEY)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -70,7 +68,7 @@ public class JwtUtil {
      * @param token JWT 令牌
      * @return 是否过期
      */
-    public boolean isTokenExpired(String token) {
+    public static boolean isTokenExpired(String token) {
         try {
             Claims claims = parseToken(token);
             return claims.getExpiration().before(new Date());
@@ -85,7 +83,7 @@ public class JwtUtil {
      * @param token JWT 令牌
      * @return 用户ID
      */
-    public Long getUserIdFromToken(String token) {
+    public static Long getUserIdFromToken(String token) {
         Claims claims = parseToken(token);
         return claims.get("userId", Long.class);
     }
