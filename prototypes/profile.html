@@ -562,7 +562,7 @@
         .user-info-card {
             background: #161823;
             border-radius: 16px;
-            padding: 40px;
+            padding: 30px;
             margin-bottom: 30px;
             border: 1px solid #2b2d38;
         }
@@ -570,26 +570,25 @@
         .user-header {
             display: flex;
             align-items: center;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 25px;
         }
 
         .user-avatar-large {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 4px solid #2b2d38;
+            border: 3px solid #2b2d38;
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .user-avatar-large svg {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
         }
 
         .user-avatar-large img {
@@ -600,37 +599,69 @@
 
         .user-basic-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+
+        .user-nickname-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
         }
 
         .user-nickname {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 12px;
             color: #fff;
+        }
+
+        .edit-profile-btn {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-profile-btn:hover {
+            opacity: 1;
+        }
+
+        .edit-profile-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: #aaa;
         }
 
         .user-account {
             font-size: 14px;
-            color: #888;
-            margin-bottom: 20px;
+            color: #aaa;
+            margin-bottom: 15px;
         }
 
         .user-account span {
-            color: #aaa;
+            color: #999;
+            font-weight: 500;
         }
 
         .user-stats {
             display: flex;
             gap: 40px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .stat-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s;
+            gap: 6px;
         }
 
         .stat-item:hover {
@@ -638,10 +669,9 @@
         }
 
         .stat-number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 5px;
         }
 
         .stat-label {
@@ -650,22 +680,22 @@
         }
 
         .user-bio {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin: 0;
         }
 
         .bio-title {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .bio-content {
-            font-size: 15px;
+            font-size: 14px;
             color: #ddd;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         /* 作品导航标签 */
@@ -867,7 +897,8 @@
         .works-content-section.active {
             display: block;
         }
-    </style>
+
+            </style>
 </head>
 <body>
     <div class="app-container">
@@ -890,8 +921,15 @@
                             </svg>
                         </div>
                         <div class="user-basic-info">
-                            <div class="user-nickname">FunFlow</div>
-                            <div class="user-account">帐号：<span>funflow2025</span></div>
+                            <div class="user-nickname-wrapper">
+                                <div class="user-nickname">FunFlow</div>
+                                <div class="edit-profile-btn" title="编辑个人资料">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="user-account">账号：<span>funflow2025</span></div>
                             <div class="user-stats">
                                 <div class="stat-item">
                                     <div class="stat-number">128</div>
@@ -906,11 +944,10 @@
                                     <div class="stat-label">获赞</div>
                                 </div>
                             </div>
+                            <div class="user-bio">
+                                <div class="bio-content">热爱生活，分享快乐 ✨ 记录生活中的美好瞬间 📸 欢迎关注交流 💫</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="user-bio">
-                        <div class="bio-title">个人简介</div>
-                        <div class="bio-content">热爱生活，分享快乐 ✨<br>记录生活中的美好瞬间 📸<br>欢迎关注交流 💫</div>
                     </div>
                 </div>
 
@@ -1160,10 +1197,10 @@
                 document.querySelectorAll('.works-tab').forEach(t => t.classList.remove('active'));
                 // 添加当前active状态
                 this.classList.add('active');
-                
+
                 const tabType = this.getAttribute('data-tab');
                 console.log('切换到标签:', tabType);
-                
+
                 // 切换对应的内容区域
                 document.querySelectorAll('.works-content-section').forEach(section => {
                     section.classList.remove('active');
@@ -1200,8 +1237,9 @@
                 // 这里可以添加打开文件夹查看内容的逻辑
             });
         });
-    </script>
-    
+
+            </script>
+
     <!-- 加载公共组件 -->
     <script src="js/common.js"></script>
 </body>
