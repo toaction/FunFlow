@@ -48,7 +48,7 @@
 
 **前端：**
 - 用户点击更改头像按钮，选择本地图片，点击确认
-- 前端调用接口：POST /api/user/profile/avatar
+- 前端调用接口：POST `/api/user/profile/avatar`
 
 **后端：**
 1. 接收请求：处理 `POST /api/user/profile/avatar` 请求
@@ -64,3 +64,31 @@
     }
 }
 ```
+
+### 修改用户信息流程
+
+**前端：**
+- 用户修改头像、账号、昵称、个人简介，点击保存
+- 前端调用接口：`PUT /api/user/profile`
+
+**请求体内容：**
+```json
+{
+    "avatar": "https://example.com/avatar.png",
+    "username": "example@example.com",
+    "nickname": "Example User",
+    "bio": "This is an example bio."
+}
+```
+
+**后端：**
+- 接收请求：处理 `PUT /api/user/profile` 请求
+- 修改用户信息：修改数据库中该用户的信息
+
+**响应体：**
+```json
+{
+    "code": 200,
+    "msg": "success",
+    "data": null
+}

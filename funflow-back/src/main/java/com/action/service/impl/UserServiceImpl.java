@@ -1,5 +1,6 @@
 package com.action.service.impl;
 
+import com.action.domain.dto.UpdateProfileRequest;
 import com.action.exception.BusinessException;
 import com.action.dao.UserMapper;
 import com.action.domain.entity.User;
@@ -56,20 +57,20 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("头像文件不能为空");
         }
 
+        // 获取文件名和扩展名
+        String originalFilename = avatarFile.getOriginalFilename();
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+
+        // 简单的格式检查
+        if (!fileExtension.matches("jpg|jpeg|png|gif|webp")) {
+            throw new BusinessException("不支持的图片格式，仅支持 JPG、PNG、GIF、WEBP");
+        }
+
+        // 构造唯一的文件名（避免重名）并包含扩展名
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String fileName = UserContext.getUserId() + "_avatar_" + timestamp + "." + fileExtension;
+
         try {
-            // 获取文件名和扩展名
-            String originalFilename = avatarFile.getOriginalFilename();
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
-
-            // 简单的格式检查
-            if (!fileExtension.matches("jpg|jpeg|png|gif|webp")) {
-                throw new BusinessException("不支持的图片格式，仅支持 JPG、PNG、GIF、WEBP");
-            }
-
-            // 构造唯一的文件名（避免重名）并包含扩展名
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            String fileName = UserContext.getUserId() + "_avatar_" + timestamp + "." + fileExtension;
-
             // 上传图片到OSS
             String avatarUrl = ossService.uploadImage(avatarFile, fileName);
 
@@ -79,9 +80,32 @@ public class UserServiceImpl implements UserService {
             return avatarUrl;
 
         } catch (Exception e) {
-            log.error("上传头像失败，用户ID: {}", userId, e);
             throw new BusinessException("上传头像失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void updateUserProfile(UpdateProfileRequest updateProfileRequest) {
+        Long userId = checkLogin();
+
+        // 查询当前用户信息
+        User existingUser = userMapper.selectByUserId(userId);
+        if (existingUser == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 构建更新对象
+        User updateUser = new User();
+        BeanUtils.copyProperties(updateProfileRequest, updateUser);
+        updateUser.setUserId(userId);
+
+        // 执行更新
+        int affectedRows = userMapper.updateProfile(updateUser);
+        if (affectedRows == 0) {
+            throw new BusinessException("更新用户信息失败");
+        }
+
+        log.info("成功更新用户信息，用户ID: {}", userId);
     }
 
     private Long checkLogin() {

@@ -88,7 +88,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { UserFilled } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import { uploadAvatar } from '@/api/auth'
+import { uploadAvatar, updateUserProfile } from '@/api/profile'
 
 interface Props {
   modelValue: boolean
@@ -121,8 +121,8 @@ const form = reactive({
 const rules: FormRules = {
   username: [
     { required: true, message: '请输入账号', trigger: 'blur' },
-    { min: 3, max: 20, message: '账号长度在 3 到 20 个字符', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '账号只能包含字母、数字和下划线', trigger: 'blur' }
+    { min: 4, max: 20, message: '账号长度在 4 到 20 个字符', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9]+$/, message: '账号只能是4-20位数字和字母的组合', trigger: 'blur' }
   ],
   nickname: [
     { required: true, message: '请输入昵称', trigger: 'blur' },
@@ -203,25 +203,36 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     loading.value = true
 
-    // TODO: 调用更新用户信息API
-    // await updateUserProfile(form)
-
-    // 更新store中的用户信息
-    if (authStore.user) {
-      authStore.setUser({
-        ...authStore.user,
-        avatar: form.avatar,
-        username: form.username,
-        nickname: form.nickname,
-        bio: form.bio
-      })
+    // 调用更新用户信息API
+    const updateData = {
+      avatar: form.avatar || undefined,
+      username: form.username || undefined,
+      nickname: form.nickname || undefined,
+      bio: form.bio || undefined
     }
 
-    ElMessage.success('个人信息修改成功')
-    handleClose()
-  } catch (error) {
+    const response = await updateUserProfile(updateData)
+
+    if (response.code === 200) {
+      // 更新store中的用户信息
+      if (authStore.user) {
+        authStore.setUser({
+          ...authStore.user,
+          avatar: form.avatar,
+          username: form.username,
+          nickname: form.nickname,
+          bio: form.bio
+        })
+      }
+
+      ElMessage.success('个人信息修改成功')
+      handleClose()
+    } else {
+      ElMessage.error(response.message || '修改失败，请重试')
+    }
+  } catch (error: any) {
     console.error('修改个人信息失败:', error)
-    ElMessage.error('修改失败，请重试')
+    ElMessage.error(error.response?.data?.message || '修改失败，请重试')
   } finally {
     loading.value = false
   }

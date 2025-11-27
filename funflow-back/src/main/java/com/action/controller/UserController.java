@@ -1,8 +1,10 @@
 package com.action.controller;
 
 import com.action.common.Result;
+import com.action.domain.dto.UpdateProfileRequest;
 import com.action.domain.vo.UserVO;
 import com.action.service.UserService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -55,5 +57,25 @@ public class UserController {
 
         log.info("上传用户头像成功，头像URL: {}", avatarUrl);
         return Result.success(data);
+    }
+
+    /**
+     * 更新用户信息
+     *
+     * @param updateProfileRequest 更新用户信息请求
+     * @return 操作结果
+     */
+    @PutMapping("/profile")
+    public Result<Void> updateUserProfile(@RequestBody @Valid UpdateProfileRequest updateProfileRequest) {
+        log.info("更新用户信息请求，头像: {}, 账号: {}, 昵称: {}, 简介: {}",
+                updateProfileRequest.getAvatar(),
+                updateProfileRequest.getUsername(),
+                updateProfileRequest.getNickname(),
+                updateProfileRequest.getBio());
+
+        userService.updateUserProfile(updateProfileRequest);
+
+        log.info("更新用户信息成功");
+        return Result.success();
     }
 }

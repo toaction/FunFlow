@@ -75,5 +75,24 @@ public interface UserMapper {
      */
     @Update("UPDATE `user` SET last_login_at = #{lastLoginAt} WHERE user_id = #{userId}")
     int updateLastLoginAt(@Param("userId") Long userId, @Param("lastLoginAt") LocalDateTime lastLoginAt);
+
+    /**
+     * 更新用户信息
+     * 可更新字段：avatar, username, nickname, bio
+     *
+     * @param user 用户实体（包含需要更新的字段）
+     * @return 影响的行数
+     */
+    @Update("<script>" +
+            "UPDATE `user` " +
+            "<set>" +
+            "<if test='avatar != null'>avatar = #{avatar},</if>" +
+            "<if test='username != null'>username = #{username},</if>" +
+            "<if test='nickname != null'>nickname = #{nickname},</if>" +
+            "<if test='bio != null'>bio = #{bio},</if>" +
+            "</set>" +
+            "WHERE user_id = #{userId} AND status = 1 AND deleted_at IS NULL" +
+            "</script>")
+    int updateProfile(User user);
 }
 

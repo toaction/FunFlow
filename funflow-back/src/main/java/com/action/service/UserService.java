@@ -1,5 +1,6 @@
 package com.action.service;
 
+import com.action.domain.dto.UpdateProfileRequest;
 import com.action.domain.vo.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,4 +26,11 @@ public interface UserService {
      * @return 头像URL
      */
     String uploadAvatar(MultipartFile avatarFile);
+
+    /**
+     * 更新用户信息
+     *
+     * @param updateProfileRequest 更新用户信息请求
+     */
+    void updateUserProfile(UpdateProfileRequest updateProfileRequest);
 }
