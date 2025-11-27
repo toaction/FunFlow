@@ -7,7 +7,6 @@ import lombok.Data;
  * 对应文档中的用户信息接口
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 @Data
 public class UserVO {

@@ -6,7 +6,6 @@ import com.action.domain.vo.CaptchaVO;
  * 验证码服务接口
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 public interface CaptchaService {
     

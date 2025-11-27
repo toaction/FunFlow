@@ -5,7 +5,6 @@ package com.action.util;
  * 使用 ThreadLocal 存储当前登录用户信息，方便在业务代码中获取
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 public class UserContext {
 

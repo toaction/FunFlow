@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
  * 对应数据表：user
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Data
 public class User {

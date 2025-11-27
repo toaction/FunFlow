@@ -16,7 +16,6 @@ import java.util.Map;
  * 处理用户信息相关接口
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 @RestController
 @RequestMapping("/api/user")
@@ -28,7 +27,6 @@ public class UserController {
 
     /**
      * 获取用户信息
-     * https://github.com/toaction/FunFlow/issues/9
      *
      * @return 用户信息
      */

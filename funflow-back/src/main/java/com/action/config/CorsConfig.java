@@ -13,7 +13,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
  * 允许前端跨域访问后端接口
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Configuration
 public class CorsConfig {

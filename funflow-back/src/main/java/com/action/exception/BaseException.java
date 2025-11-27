@@ -5,10 +5,8 @@ import lombok.Getter;
 /**
  * 基础业务异常类
  * 所有自定义异常的基类
- * https://github.com/toaction/FunFlow/issues/4
  *
  * @author Xiangfu
- * @date 2025-11-18
  */
 @Getter
 public class BaseException extends RuntimeException {

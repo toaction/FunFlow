@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
  * 处理用户信息相关业务逻辑
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 public interface UserService {
 

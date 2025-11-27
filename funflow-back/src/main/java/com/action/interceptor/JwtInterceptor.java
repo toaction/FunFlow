@@ -13,7 +13,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * 用于验证用户身份，校验 JWT 令牌的有效性
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 @Component
 @Slf4j

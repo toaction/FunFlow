@@ -8,7 +8,6 @@ import lombok.Data;
  * 发送邮箱验证码请求 DTO
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Data
 public class SendEmailCodeRequest {

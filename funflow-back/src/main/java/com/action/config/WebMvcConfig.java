@@ -11,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 用于注册拦截器
  *
  * @author Xiangfu
- * @date 2025-11-26
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {

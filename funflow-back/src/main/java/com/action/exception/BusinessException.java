@@ -7,7 +7,6 @@ import com.action.common.Code;
  * 用于业务逻辑中的异常情况
  *
  * @author Xiangfu
- * @date 2025-11-18
  */
 public class BusinessException extends BaseException {
     

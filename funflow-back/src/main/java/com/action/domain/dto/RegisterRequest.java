@@ -9,7 +9,6 @@ import lombok.Data;
  * 用户注册请求 DTO
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Data
 public class RegisterRequest {

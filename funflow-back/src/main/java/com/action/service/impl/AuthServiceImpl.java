@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
  * 认证服务实现类
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Service
 @Slf4j

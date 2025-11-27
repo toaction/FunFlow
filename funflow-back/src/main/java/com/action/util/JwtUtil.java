@@ -13,7 +13,6 @@ import java.util.Map;
  * 用于生成和解析 JWT 令牌
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 public class JwtUtil {
 

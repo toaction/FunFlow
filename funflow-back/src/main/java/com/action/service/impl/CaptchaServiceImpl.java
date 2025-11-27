@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
  * 验证码服务实现类
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Service
 @Slf4j

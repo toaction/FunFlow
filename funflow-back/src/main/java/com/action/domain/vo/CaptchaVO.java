@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
  * 图形验证码响应 VO
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Data
 @NoArgsConstructor

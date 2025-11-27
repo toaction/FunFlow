@@ -4,7 +4,6 @@ package com.action.service;
  * 邮件服务接口
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 public interface EmailService {
     

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
  * 用户数据访问层
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Mapper
 public interface UserMapper {

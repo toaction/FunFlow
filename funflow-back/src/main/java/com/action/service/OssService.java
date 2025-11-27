@@ -16,7 +16,6 @@ import java.util.Date;
  * 处理文件上传到阿里云对象存储服务
  *
  * @author Xiangfu
- * @date 2025-11-27
  */
 @Service
 public class OssService {

@@ -9,7 +9,6 @@ import com.action.domain.vo.LoginVO;
  * 认证服务接口
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 public interface AuthService {
 

@@ -6,7 +6,6 @@ import lombok.Data;
  * 登录成功返回的 VO
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Data
 public class LoginVO {

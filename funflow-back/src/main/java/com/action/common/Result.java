@@ -7,7 +7,6 @@ import lombok.Data;
  *
  * @param <T> 返回数据类型
  * @author Xiangfu
- * @date 2025-11-18
  */
 @Data
 public class Result<T> {

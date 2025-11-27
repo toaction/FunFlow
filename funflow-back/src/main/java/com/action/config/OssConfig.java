@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
  * 用于绑定 application.yml 中的阿里云对象存储配置
  *
  * @author Xiangfu
- * @date 2025-11-27
  */
 @Configuration
 @ConfigurationProperties(prefix = "aliyun.oss")

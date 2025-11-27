@@ -11,7 +11,6 @@ import java.util.Properties;
  * Kaptcha 图形验证码配置类
  *
  * @author Xiangfu
- * @date 2025-11-20
  */
 @Configuration
 public class KaptchaConfig {
