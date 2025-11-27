@@ -48,3 +48,9 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+aliyun:
+  oss:
+    accessKeyId:
+    accessKeySecret:
+    bucketName: ali-oss-shanghai
+    endpoint: oss-cn-shanghai.aliyuncs.com

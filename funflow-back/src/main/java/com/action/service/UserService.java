@@ -1,6 +1,7 @@
 package com.action.service;
 
 import com.action.domain.vo.UserVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户服务接口
@@ -17,4 +18,12 @@ public interface UserService {
      * @return 用户信息
      */
     UserVO getCurrentUser();
+
+    /**
+     * 上传用户头像
+     *
+     * @param avatarFile 头像文件
+     * @return 头像URL
+     */
+    String uploadAvatar(MultipartFile avatarFile);
 }

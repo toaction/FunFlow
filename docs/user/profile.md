@@ -30,3 +30,37 @@
         "bio": "This is an example bio."
     }
 }
+```
+
+## 修改个人信息
+
+### 需求分析
+- 点击修改个人信息按钮，弹出修改信息框，展示头像、账号、昵称、个人简介信息
+- 点击更换头像，调用后端接口，使用阿里云 OSS 保存头像，返回图片 URL
+- 点击保存按钮，调用后端接口，修改用户信息
+
+### 接口定义
+
+- 上传头像：`POST /api/user/profile/avatar`
+- 修改用户信息：`PUT /api/user/profile`
+
+### 上传头像流程
+
+**前端：**
+- 用户点击更改头像按钮，选择本地图片，点击确认
+- 前端调用接口：POST /api/user/profile/avatar
+
+**后端：**
+1. 接收请求：处理 `POST /api/user/profile/avatar` 请求
+2. 上传图片：使用阿里云 OSS 上传图片，返回图片 URL
+
+**响应体：**
+```json
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "avatar": "https://example.com/avatar.png"
+    }
+}
+```

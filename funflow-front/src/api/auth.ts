@@ -75,3 +75,18 @@ export function getUserProfile() {
   return request.get<any, ApiResponse<UserInfo>>('/user/profile')
 }
 
+/**
+ * 上传用户头像
+ * @param avatarFile 头像文件
+ * @returns 头像URL响应数据
+ */
+export function uploadAvatar(avatarFile: File) {
+  const formData = new FormData()
+  formData.append('avatar', avatarFile)
+  return request.post<any, ApiResponse<{ avatar: string }>>('/user/profile/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+

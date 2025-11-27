@@ -25,9 +25,11 @@
             type="primary"
             size="small"
             @click="handleAvatarClick"
+            :loading="loading"
+            :disabled="loading"
             class="upload-btn"
           >
-            更换头像
+            {{ loading ? '上传中...' : '更换头像' }}
           </el-button>
           <input
             ref="avatarInput"
@@ -86,6 +88,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { UserFilled } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { uploadAvatar } from '@/api/auth'
 
 interface Props {
   modelValue: boolean
@@ -144,7 +147,7 @@ const handleAvatarClick = () => {
   avatarInput.value?.click()
 }
 
-const handleAvatarChange = (event: Event) => {
+const handleAvatarChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
@@ -161,12 +164,27 @@ const handleAvatarChange = (event: Event) => {
       return
     }
 
-    // 创建预览URL
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      form.avatar = e.target?.result as string
+    try {
+      // 显示上传中状态
+      loading.value = true
+      ElMessage.info('正在上传头像...')
+
+      // 调用后端上传接口
+      const response = await uploadAvatar(file)
+
+      if (response.code === 200 && response.data) {
+        // 上传成功，更新头像URL
+        form.avatar = response.data.avatar
+        ElMessage.success('头像上传成功')
+      } else {
+        ElMessage.error(response.message || '头像上传失败')
+      }
+    } catch (error: any) {
+      console.error('上传头像失败:', error)
+      ElMessage.error(error.response?.data?.message || '头像上传失败，请重试')
+    } finally {
+      loading.value = false
     }
-    reader.readAsDataURL(file)
   }
 }
 
