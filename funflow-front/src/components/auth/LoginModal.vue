@@ -6,6 +6,7 @@ import { ElMessage, ElDialog, ElForm, ElFormItem, ElInput, ElButton } from 'elem
 
 const props = defineProps<{
   show: boolean
+  forced?: boolean // 是否为强制登录模式
 }>()
 
 const emit = defineEmits(['close', 'switch-to-register'])
@@ -46,7 +47,15 @@ const fetchCaptcha = async () => {
 }
 
 const handleClose = () => {
+  // 强制登录模式下不允许关闭
+  if (props.forced) {
+    return
+  }
   emit('close')
+}
+
+const switchToRegister = () => {
+  emit('switch-to-register', props.forced) // 传递强制模式状态
 }
 
 const handleLogin = async () => {
@@ -107,12 +116,15 @@ const rules = {
   <el-dialog
     :model-value="show"
     @close="handleClose"
-    width="440px"
-    class="glass-dialog"
-    align-center
-    :show-close="true"
+    width="380px"
+    class="glass-dialog non-modal-dialog"
+    :show-close="!forced"
     :append-to-body="true"
     destroy-on-close
+    :modal="false"
+    :close-on-click-modal="false"
+    :close-on-press-escape="!forced"
+    :z-index="700"
   >
     <template #header>
       <div class="modal-header">
@@ -171,7 +183,7 @@ const rules = {
         </el-button>
 
         <div class="switch-mode">
-          还没有账号？<a class="switch-link" @click="$emit('switch-to-register')">立即注册</a>
+          还没有账号？<a class="switch-link" @click="switchToRegister">立即注册</a>
         </div>
       </el-form>
     </div>
@@ -300,6 +312,19 @@ const rules = {
 </style>
 
 <style>
+/* Override dialog wrapper for non-modal behavior */
+:deep(.el-overlay-dialog) {
+  z-index: 700 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* Make the dialog itself interactive */
+:deep(.el-overlay-dialog .el-dialog) {
+  pointer-events: auto !important;
+  z-index: 701 !important;
+}
+
 /* Global override for this specific dialog class */
 .glass-dialog.el-dialog {
   background: rgba(31, 33, 45, 0.95) !important;
@@ -309,6 +334,11 @@ const rules = {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
+/* Special style for non-modal dialog */
+.non-modal-dialog {
+  max-width: 380px !important;
+}
+
 .glass-dialog .el-dialog__headerbtn .el-dialog__close {
   color: #8a8b8e;
   font-size: 20px;
@@ -316,5 +346,15 @@ const rules = {
 
 .glass-dialog .el-dialog__headerbtn:hover .el-dialog__close {
   color: #fff;
+}
+
+/* 在强制模式下隐藏关闭按钮 */
+.glass-dialog .el-dialog__headerbtn {
+  display: none !important;
+}
+
+/* 只有在非强制模式下显示关闭按钮 */
+.glass-dialog:not(.forced) .el-dialog__headerbtn {
+  display: block !important;
 }
 </style>

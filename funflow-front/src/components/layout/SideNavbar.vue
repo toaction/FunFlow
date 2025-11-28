@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { ElScrollbar } from 'element-plus'
 
-const route = useRoute()
 </script>
 
 <template>
@@ -11,8 +10,8 @@ const route = useRoute()
       <!-- 导航菜单 -->
       <nav class="menu">
         <div class="menu-section">
-          <div class="section-title">主要功能</div>
-          
+          <div class="section-title">视频推送</div>
+
           <!-- 热门视频 -->
           <RouterLink to="/hot" class="menu-item" active-class="active">
             <div class="item-content">
@@ -34,13 +33,7 @@ const route = useRoute()
             </div>
             <div class="active-indicator"></div>
           </RouterLink>
-        </div>
 
-        <div class="menu-divider"></div>
-
-        <div class="menu-section">
-          <div class="section-title">个人空间</div>
-          
           <!-- 我的关注 -->
           <RouterLink to="/follow" class="menu-item" active-class="active">
             <div class="item-content">
@@ -48,6 +41,23 @@ const route = useRoute()
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
               <span class="item-text">我的关注</span>
+            </div>
+            <div class="active-indicator"></div>
+          </RouterLink>
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-section">
+          <div class="section-title">个人空间</div>
+
+          <!-- 视频创作 -->
+          <RouterLink to="/create" class="menu-item" active-class="active">
+            <div class="item-content">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              <span class="item-text">视频创作</span>
             </div>
             <div class="active-indicator"></div>
           </RouterLink>

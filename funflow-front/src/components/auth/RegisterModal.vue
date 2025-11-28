@@ -5,9 +5,10 @@ import { ElMessage, ElDialog, ElForm, ElFormItem, ElInput, ElButton } from 'elem
 
 const props = defineProps<{
   show: boolean
+  forced?: boolean // 是否为强制注册模式
 }>()
 
-const emit = defineEmits(['close', 'switch-to-login'])
+const emit = defineEmits(['close', 'switch-to-login', 'switch-to-register-with-forced'])
 
 const loading = ref(false)
 const sendingCode = ref(false)
@@ -128,7 +129,15 @@ const handleRegister = async () => {
 }
 
 const handleClose = () => {
+  // 强制注册模式下不允许关闭
+  if (props.forced) {
+    return
+  }
   emit('close')
+}
+
+const switchToLogin = () => {
+  emit('switch-to-login', props.forced) // 传递强制模式状态
 }
 
 // Password strength
@@ -195,12 +204,15 @@ const rules = {
   <el-dialog
     :model-value="show"
     @close="handleClose"
-    width="440px"
-    class="glass-dialog"
-    align-center
-    :show-close="true"
+    width="380px"
+    class="glass-dialog non-modal-dialog"
+    :show-close="!forced"
     :append-to-body="true"
     destroy-on-close
+    :modal="false"
+    :close-on-click-modal="false"
+    :close-on-press-escape="!forced"
+    :z-index="700"
   >
     <template #header>
       <div class="modal-header">
@@ -287,7 +299,7 @@ const rules = {
         </el-button>
 
         <div class="switch-mode">
-          已有账号？<a class="switch-link" @click="$emit('switch-to-login')">立即登录</a>
+          已有账号？<a class="switch-link" @click="switchToLogin">立即登录</a>
         </div>
       </el-form>
     </div>
@@ -468,5 +480,65 @@ const rules = {
 
 :deep(.el-form-item__label) {
   color: #e4e6eb;
+}
+</style>
+
+<style>
+/* Global override for this specific dialog class */
+.glass-dialog.el-dialog {
+  background: rgba(31, 33, 45, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+  z-index: 700 !important;
+}
+
+/* Special style for non-modal dialog */
+.non-modal-dialog {
+  max-width: 380px !important;
+  pointer-events: auto !important;
+}
+
+/* Override dialog positioning to ensure center alignment */
+:deep(.el-overlay-dialog .el-dialog) {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Override dialog wrapper for non-modal behavior */
+:deep(.el-overlay-dialog) {
+  z-index: 700 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* Make dialog itself interactive */
+:deep(.el-overlay-dialog .el-dialog) {
+  pointer-events: auto !important;
+  z-index: 701 !important;
+}
+
+.glass-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: #8a8b8e;
+  font-size: 20px;
+}
+
+.glass-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+  color: #fff;
+}
+
+/* 在强制模式下隐藏关闭按钮 */
+.glass-dialog .el-dialog__headerbtn {
+  display: none !important;
+}
+
+/* 只有在非强制模式下显示关闭按钮 */
+.glass-dialog:not(.forced) .el-dialog__headerbtn {
+  display: block !important;
 }
 </style>

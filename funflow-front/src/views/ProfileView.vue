@@ -275,15 +275,8 @@ const formatCount = (count: number): string => {
   return count.toString()
 }
 
-// 组件挂载时获取用户信息并检查登录状态
+// 组件挂载时获取用户信息
 onMounted(async () => {
-  // 检查是否已登录
-  if (!authStore.token) {
-    ElMessage.warning('请先登录')
-    router.push('/')
-    return
-  }
-
   // 如果有token但没有用户信息，获取用户信息
   if (!authStore.user) {
     try {
