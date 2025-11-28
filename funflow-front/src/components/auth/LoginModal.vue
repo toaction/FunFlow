@@ -54,6 +54,11 @@ const handleClose = () => {
   emit('close')
 }
 
+// 登录成功后关闭弹窗，不受强制模式限制
+const handleLoginSuccess = () => {
+  emit('close', true) // 传递强制关闭参数
+}
+
 const switchToRegister = () => {
   emit('switch-to-register', props.forced) // 传递强制模式状态
 }
@@ -74,7 +79,8 @@ const handleLogin = async () => {
           ElMessage.success('登录成功')
           // 登录成功后刷新验证码，为下次登录做准备
           fetchCaptcha()
-          handleClose()
+          // 登录成功后强制关闭弹窗，不受强制模式限制
+          handleLoginSuccess()
         } else {
           ElMessage.error(res.message || '登录失败，请检查用户名或密码')
           // 登录失败也刷新验证码

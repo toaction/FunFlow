@@ -39,16 +39,22 @@ const handleSwitchToLogin = (forced: boolean) => {
   isForced.value = forced
 }
 
-const closeLogin = () => {
-  if (isForced.value) return
+const closeLogin = (forceClose = false) => {
+  // 只有在非强制模式下或强制关闭时才允许关闭
+  if (isForced.value && !forceClose) return
   showLogin.value = false
-  isForced.value = false
+  if (forceClose) {
+    isForced.value = false
+  }
 }
 
-const closeRegister = () => {
-  if (isForced.value) return
+const closeRegister = (forceClose = false) => {
+  // 只有在非强制模式下或强制关闭时才允许关闭
+  if (isForced.value && !forceClose) return
   showRegister.value = false
-  isForced.value = false
+  if (forceClose) {
+    isForced.value = false
+  }
 }
 
 // 监听路由变化，检查访问权限

@@ -115,7 +115,8 @@ const handleRegister = async () => {
         })
         if (res.code === 200) {
           ElMessage.success(res.message || '注册成功')
-          emit('switch-to-login')
+          // 注册成功后强制关闭弹窗，不受强制模式限制
+          handleRegisterSuccess()
         } else {
           ElMessage.error(res.message || '注册失败')
         }
@@ -134,6 +135,11 @@ const handleClose = () => {
     return
   }
   emit('close')
+}
+
+// 注册成功后关闭弹窗，不受强制模式限制
+const handleRegisterSuccess = () => {
+  emit('close', true) // 传递强制关闭参数
 }
 
 const switchToLogin = () => {
@@ -184,7 +190,7 @@ onBeforeUnmount(() => {
 const rules = {
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email' as const, message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
   captchaText: [
     { required: true, message: '请输入图形验证码', trigger: 'blur' }
