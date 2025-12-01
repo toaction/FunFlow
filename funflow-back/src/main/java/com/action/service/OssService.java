@@ -12,10 +12,9 @@ public interface OssService {
     /**
      * OSS 上传图片
      *
-     * @param file 图片文件
-     * @param fileName 文件名
-     * @return 图片 URL
-     * @throws Exception 上传异常
+     * @param file 文件
+     * @param objectName 存储路径
+     * @return URL
      */
-    String uploadImage(MultipartFile file, String fileName) throws Exception;
+    String upload(MultipartFile file, String objectName);
 }

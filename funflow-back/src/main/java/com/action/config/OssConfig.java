@@ -1,8 +1,12 @@
 package com.action.config;
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClient;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * 阿里云 OSS 配置类
@@ -18,4 +22,10 @@ public class OssConfig {
     private String accessKeyId;
     private String accessKeySecret;
     private String bucketName;
+
+    @Bean(destroyMethod = "shutdown") // 👈 关键：自动调用 shutdown()
+    @Primary
+    public OSS ossClient() {
+        return  new OSSClient(endpoint, accessKeyId, accessKeySecret);
+    }
 }

@@ -68,15 +68,15 @@ public class UserServiceImpl implements UserService {
 
         // 构造唯一的文件名（避免重名）并包含扩展名
         String timestamp = String.valueOf(System.currentTimeMillis());
-        String fileName = UserContext.getUserId() + "_avatar_" + timestamp + "." + fileExtension;
+        String fileName = UserContext.getUserId() + "_" + timestamp + "." + fileExtension;
 
         try {
             // 上传图片到OSS
-            String avatarUrl = ossService.uploadImage(avatarFile, fileName);
+            String avatarUrl = ossService.upload(avatarFile, "avatars/" + fileName);
 
             // TODO: 头像审核
             // 这里先不进行数据库头像更新，待前端返回完整的用户信息后一同更新
-            log.info("成功上传用户头像，用户ID: {}, 头像URL: {}", userId, avatarUrl);
+            // 缺点：前端传的 URL 可能不可信
             return avatarUrl;
 
         } catch (Exception e) {
