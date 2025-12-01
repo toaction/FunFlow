@@ -33,7 +33,7 @@
 CREATE TABLE video (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '视频唯一标识',
     user_id BIGINt UNSIGNED NOT NULL COMMENT '上传用户 ID',
-    title VARCHAR(255) NOT NULL DEFAULT '' COMMENT '视频文案',
+    caption VARCHAR(255) NOT NULL DEFAULT '' COMMENT '视频文案',
     tags JSON DEFAULT NULL COMMENT '视频标签列表，如 ["搞笑", "美食"]',
     cover_url VARCHAR(512) NOT NULL DEFAULT '' COMMENT '视频封面图片 URL',
     video_url VARCHAR(512) NOT NULL DEFAULT '' COMMENT '视频文件 URL',
@@ -58,7 +58,7 @@ CREATE TABLE video (
 ```sql
 INSERT INTO video (
     user_id,
-    title,
+    caption,
     tags,
     cover_url,
     video_url,

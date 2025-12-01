@@ -24,6 +24,13 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: -1ms
+
+  # 文件上传
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB     # 单个文件最大（如视频、封面）
+      max-request-size: 100MB  # 整个请求最大（多个文件总和）
   
   # 邮件配置
   mail:
