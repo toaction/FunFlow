@@ -1,0 +1,21 @@
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+.DS_Store?
+
+# Spring Boot
+application-local.yml
+application-dev.yml
+
+# Build
+build/
+out/
+dist/
+target/
+
+# Test
+src/test/
+**/test/
