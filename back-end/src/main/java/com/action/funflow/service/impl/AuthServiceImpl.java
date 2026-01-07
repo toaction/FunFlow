@@ -1,10 +1,14 @@
 package com.action.funflow.service.impl;
 
 
+import cn.hutool.core.util.RandomUtil;
 import com.action.funflow.common.RedisConstants;
+import com.action.funflow.dao.UserMapper;
+import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.vo.CaptchaVO;
 import com.action.funflow.exception.BusinessException;
 import com.action.funflow.service.AuthService;
+import com.action.funflow.service.EmailService;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +32,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private DefaultKaptcha defaultKaptcha;
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public CaptchaVO generateCaptcha() {
@@ -80,6 +88,68 @@ public class AuthServiceImpl implements AuthService {
             return "data:image/png;base64," + base64;
         } catch (IOException e) {
             throw new BusinessException("验证码图片编码失败");
+        }
+    }
+
+    @Override
+    public void sendEmailCode(SendEmailCodeRequest request) {
+        String email = request.getEmail().toLowerCase();
+        String captchaId = request.getCaptchaId();
+        String captchaText = request.getCaptchaText();
+
+        // 校验图形验证码
+        validateCaptcha(captchaId, captchaText);
+
+        // 校验邮箱是否已被注册
+        validateEmailNotRegistered(email);
+
+        // 生成 6 位数字，保存在 Redis 中，并发送邮件验证码
+        String emailCode = RandomUtil.randomNumbers(6);
+        String redisKey = RedisConstants.getEmailCodeKey(email);
+        stringRedisTemplate.opsForValue().set(
+                redisKey,
+                emailCode,
+                RedisConstants.EMAIL_CODE_EXPIRE_SECONDS,
+                TimeUnit.SECONDS
+        );
+        emailService.sendEmailCode(email, emailCode);
+
+        log.info("邮箱验证码发送成功，邮箱: {}, 验证码: {}", email, emailCode);
+    }
+
+    /**
+     * 校验图形验证码
+     *
+     * @param captchaId   验证码ID
+     * @param captchaText 用户输入的验证码文本
+     */
+    private void validateCaptcha(String captchaId, String captchaText) {
+        String redisKey = RedisConstants.getCaptchaKey(captchaId);
+        String correctCaptchaText = stringRedisTemplate.opsForValue().get(redisKey);
+
+        // 无论对错，立即删除 Redis 中的该 captchaId（一次性使用）
+        stringRedisTemplate.delete(redisKey);
+
+        // 验证码不存在或已过期
+        if (correctCaptchaText == null) {
+            throw new BusinessException("验证码已过期，请重新获取");
+        }
+
+        // 忽略大小写比较
+        if (!correctCaptchaText.equalsIgnoreCase(captchaText)) {
+            throw new BusinessException("验证码错误，请重新输入");
+        }
+    }
+
+    /**
+     * 校验邮箱是否已被注册
+     *
+     * @param email 邮箱地址（小写）
+     */
+    private void validateEmailNotRegistered(String email) {
+        int count = userMapper.countByEmail(email);
+        if (count > 0) {
+            throw new BusinessException("该邮箱已被注册");
         }
     }
 

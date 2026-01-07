@@ -1,12 +1,12 @@
 package com.action.funflow.controller;
 
 import com.action.funflow.common.Result;
+import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.vo.CaptchaVO;
 import com.action.funflow.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 认证控制器
@@ -28,6 +28,18 @@ public class AuthController {
     public Result<CaptchaVO> getCaptcha() {
         CaptchaVO captchaVO = authService.generateCaptcha();
         return Result.success(captchaVO);
+    }
+
+    /**
+     * 发送邮箱验证码
+     *
+     * @param request 发送邮箱验证码请求
+     * @return 结果
+     */
+    @PostMapping("/send-email-code")
+    public Result<Void> sendEmailCode(@Valid @RequestBody SendEmailCodeRequest request) {
+        authService.sendEmailCode(request);
+        return Result.success();
     }
 
 }
