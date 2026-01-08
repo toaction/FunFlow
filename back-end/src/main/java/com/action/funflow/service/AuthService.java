@@ -1,5 +1,6 @@
 package com.action.funflow.service;
 
+import com.action.funflow.domain.dto.RegisterRequest;
 import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.vo.CaptchaVO;
 
@@ -18,5 +19,12 @@ public interface AuthService {
      * @param request 发送邮箱验证码请求
      */
     void sendEmailCode(SendEmailCodeRequest request);
+
+    /**
+     * 用户注册
+     *
+     * @param request 注册请求
+     */
+    void register(RegisterRequest request);
 
 }

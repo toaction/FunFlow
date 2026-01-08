@@ -1,6 +1,7 @@
 package com.action.funflow.controller;
 
 import com.action.funflow.common.Result;
+import com.action.funflow.domain.dto.RegisterRequest;
 import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.vo.CaptchaVO;
 import com.action.funflow.service.AuthService;
@@ -42,4 +43,15 @@ public class AuthController {
         return Result.success();
     }
 
+    /**
+     * 用户注册
+     *
+     * @param request 注册请求
+     * @return 结果
+     */
+    @PostMapping("/register")
+    public Result<Void> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return Result.success();
+    }
 }
