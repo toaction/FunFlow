@@ -1,8 +1,10 @@
 package com.action.funflow.service;
 
+import com.action.funflow.domain.dto.LoginRequest;
 import com.action.funflow.domain.dto.RegisterRequest;
 import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.vo.CaptchaVO;
+import com.action.funflow.domain.vo.LoginVO;
 
 public interface AuthService {
 
@@ -27,4 +29,5 @@ public interface AuthService {
      */
     void register(RegisterRequest request);
 
+    LoginVO login(LoginRequest request);
 }

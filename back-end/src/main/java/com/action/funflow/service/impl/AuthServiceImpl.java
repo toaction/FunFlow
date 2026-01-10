@@ -6,13 +6,16 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.action.funflow.common.Code;
 import com.action.funflow.common.RedisConstant;
 import com.action.funflow.dao.UserMapper;
+import com.action.funflow.domain.dto.LoginRequest;
 import com.action.funflow.domain.dto.RegisterRequest;
 import com.action.funflow.domain.dto.SendEmailCodeRequest;
 import com.action.funflow.domain.entity.User;
 import com.action.funflow.domain.vo.CaptchaVO;
+import com.action.funflow.domain.vo.LoginVO;
 import com.action.funflow.exception.BusinessException;
 import com.action.funflow.service.AuthService;
 import com.action.funflow.service.EmailService;
+import com.action.funflow.util.JwtUtil;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -254,5 +259,72 @@ public class AuthServiceImpl implements AuthService {
             return email.substring(0, atIndex);
         }
         throw new BusinessException(Code.VALIDATION_ERROR, "邮箱格式不正确");
+    }
+
+    @Override
+    public LoginVO login(LoginRequest request) {
+        String email = request.getEmail().toLowerCase();
+        String password = request.getPassword();
+        String captchaId = request.getCaptchaId();
+        String captchaText = request.getCaptchaText();
+
+        // 校验图形验证码
+        validateCaptcha(captchaId, captchaText);
+
+        // 验证用户凭证
+        User user = validateUserCredentials(email, password);
+
+        // 更新登录时间
+        userMapper.updateLastLoginAt(user.getUserId(), LocalDateTime.now());
+
+        // 生成 JWT 令牌
+        String accessToken = generateAccessToken(user);
+        LoginVO loginVO = new LoginVO();
+        loginVO.setAccessToken(accessToken);
+
+        log.info("用户登录成功，邮箱: {}, 时间: {}", email, LocalDateTime.now());
+        return loginVO;
+    }
+
+    /**
+     * 验证用户凭证
+     *
+     * @param email    邮箱
+     * @param password 明文密码
+     * @return 用户对象
+     */
+    private User validateUserCredentials(String email, String password) {
+        // 根据邮箱查询用户
+        User user = userMapper.selectByEmail(email);
+
+        // 用户不存在
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 密码不匹配
+        if (!BCrypt.checkpw(password, user.getPasswordHash())) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 用户状态异常
+        if (user.getStatus() != 0) {
+            throw new BusinessException("账号异常，请联系客服");
+        }
+
+        return user;
+    }
+
+    /**
+     * 生成 JWT 访问令牌
+     *
+     * @param user 用户对象
+     * @return accessToken
+     */
+    private String generateAccessToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getUserId());
+
+        return JwtUtil.generateAccessToken(claims);
     }
 }
