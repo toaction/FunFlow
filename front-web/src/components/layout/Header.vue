@@ -24,17 +24,37 @@
     </div>
 
     <div class="header-right">
-      <button class="login-btn" @click="handleLogin">
+      <!-- 未登录状态 -->
+      <button v-if="!userStore.isLoggedIn" class="login-btn" @click="showAuthDialog = true">
         登录
       </button>
+      <!-- 已登录状态 -->
+      <div v-else class="user-info">
+        <span class="username">{{ userEmail }}</span>
+        <button class="logout-btn" @click="handleLogout">退出</button>
+      </div>
     </div>
+
+    <!-- 登录/注册弹窗 -->
+    <AuthDialog v-model="showAuthDialog" />
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
+import AuthDialog from '@/components/common/AuthDialog.vue'
 
+const userStore = useUserStore()
 const searchQuery = ref('')
+const showAuthDialog = ref(false)
+
+// 从localStorage获取用户邮箱（实际项目中应该从token解析或从用户信息接口获取）
+const userEmail = computed(() => {
+  const email = localStorage.getItem('user_email')
+  return email || '用户'
+})
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
@@ -43,9 +63,10 @@ const handleSearch = () => {
   }
 }
 
-const handleLogin = () => {
-  console.log('点击登录按钮')
-  // TODO: 实现登录逻辑
+const handleLogout = () => {
+  userStore.logout()
+  localStorage.removeItem('user_email')
+  ElMessage.success('已退出登录')
 }
 </script>
 
@@ -163,5 +184,32 @@ const handleLogin = () => {
 
 .login-btn:hover {
   background: #40a9ff;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.username {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.logout-btn {
+  padding: 6px 16px;
+  background: transparent;
+  color: #888888;
+  border: 1px solid #3a3a4a;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #3a3a4a;
+  color: #ffffff;
 }
 </style>
