@@ -1,15 +1,21 @@
 package com.action.funflow.config;
 
+import com.action.funflow.interceptor.AuthInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private AuthInterceptor authInterceptor;
 
     /**
      * 设置 Controller 统一前缀
@@ -35,6 +41,16 @@ public class WebConfig implements WebMvcConfigurer {
                         .maxAge(3600);  // 预检请求的缓存时间（秒）
             }
         };
+    }
+
+    /**
+     * 注册拦截器
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns("/api/**")  // 拦截所有 /api 路径
+                .excludePathPatterns("/api/auth/**");
     }
 
 }
